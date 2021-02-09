@@ -1,0 +1,82 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-tree-deciduous"></span> {{ 'Offer option'|lang }}</h1>
+	<p>{{ 'Here you can edit the offers options'|lang }}</p>
+</div>
+<p><a href="?controller=options" title="{{ 'Back to list offers options'|lang }}" class="btn btn-success">{{ 'Back to list offers options'|lang }}</a></p>
+<br>
+<form method="post" class="form-horizontal" role="form">
+	{% if option %}
+		<input type="hidden" name="action" value="edit_option">
+		<input type="hidden" name="id" value="{{ option.id }}">
+		<input type="hidden" name="token" value="{{ generateToken('admin_edit_option') }}">
+	{% else %}
+		<input type="hidden" name="action" value="add_option">
+		<input type="hidden" name="token" value="{{ generateToken('admin_add_option') }}">
+	{% endif %}
+	<div class="form-group">
+		<label for="name" class="col-md-2 control-label">{{ 'The name'|lang }}:</label>
+		<div class="col-md-10">
+			<input type="text" class="form-control" name="name" required maxlength="128" placeholder="{{ 'The name'|lang }}" title="{{ 'The name'|lang }}" {% if option %}value="{{ option.name }}"{% endif %} {% if option.pernament %}disabled{% endif %}>
+		</div>
+	</div>
+	<div class="form-group option_label_required">
+		<div class="col-md-10 col-md-offset-2">
+			<label><input type="checkbox" name="required" {% if option.required %}checked{% endif %} title="{{ 'Check when the field should be required'|lang }}"> {{ 'Required field'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-md-10 col-md-offset-2">
+			<label><input type="checkbox" name="search" {% if not option or option.search %}checked{% endif %} title="{{ 'Show in search box'|lang }}"> {{ 'Show in search box'|lang }}</label>
+		</div>
+	</div>
+	{% if option_kinds and not option.pernament %}
+		<div class="form-group">
+			<label for="kind" class="col-md-2 control-label">{{ 'Kind'|lang }}:</label>
+			<div class="col-md-10">
+				<select name="kind" required class="option_select form-control">
+					{% for key,item in option_kinds %}
+						<option value="{{ key }}" {% if option and option.kind==key %}selected{% endif %}>{{ item }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="form-group option_label">
+			<label for="select_choices" class="col-md-2 control-label">{{ 'Enter after char ; available choices'|lang }}:</label>
+			<div class="col-md-10">
+				<textarea class="form-control" placeholder="{{ 'Enter after char ; available choices'|lang }}" title="{{ 'Enter after char ; available choices'|lang }}" required name="select_choices">{% if option.kind=='select' or option.kind=='checkbox' %}{{ option.select_choices }}{% endif %}</textarea>
+			</div>
+		</div>
+	{% endif %}
+	{% if option.pernament %}
+		<input type="hidden" name="kind" value="pernament">
+	{% endif %}
+	{% if categories %}
+		<div class="form-group">
+			<label for="categories" class="col-md-2 control-label">{{ 'Categories in which should be display'|lang }}:</label>
+			<div class="col-md-10">
+				<label><input type="checkbox" name="categories_all" title="{{ 'Check this box if you want to show this option in all categories'|lang }}" class="option_all_categories" {% if not option or option.categories_all %}checked{% endif %}> {{ 'All categories'|lang }}</label>
+				<div class="option_all_categories_div parent_select_checkbox" {% if not option or option.categories_all %}style="display: none"{% endif %}>
+					<label><input type="checkbox" class="select_checkbox" title="{{ 'Click to select or deselect all items'|lang }}"> {{ 'Select / deselect all'|lang }}</label><br>
+					{% for item in categories %}
+						<label style="margin-left:{{ item.depth*20 }}px;display:block;" class="select_option depth_{{ item.depth }} pokaz_opcje {% if item.category_id %}hide hidden_option_{{ item.category_id }}{% endif %}" data-depth="{{ item.depth }}">
+							<input type="checkbox" name="categories[]" value="{{ item.id }}" {% if item.id in option.categories %}checked{% endif %} class="checkbox_get_subcategories"> {{ item.name }}
+							<a href="#" class="link_to_hidden_option" data-id="{{ item.id }}"> <span class="span_active">&dArr;</span><span class="span_inactive" style="display: none">&uArr;</span></a>
+						</label>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	{% else %}
+		<input type="hidden" name="categories_all" value="1">
+	{% endif %}
+	<div class="form-group">
+		<div class="col-md-offset-2 col-md-10">
+			<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+		</div>
+	</div>
+</form>
+{% endblock %}

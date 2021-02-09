@@ -1,0 +1,351 @@
+
+{% extends "main.tpl" %}
+
+{% block css %}
+	{{ parent() }}
+	{% if offer.photos %}
+		<link rel="stylesheet" href="views/{{ settings.template }}/css/lightbox.css"/>
+	{% endif %}
+{% endblock %}
+
+{% block javascript %}
+	{{ parent() }}
+	{% if offer.photos %}
+		<script src="views/{{ settings.template }}/js/lightbox.js"></script>
+		<script>
+			lightbox.option({
+				'albumLabel': "%1 / %2"
+			})
+		</script>
+	{% endif %}
+	{% if showContactTab %}
+		<script>
+			$(function(){$('.nav-tabs a[href="#contact_form"]').tab('show')})
+		</script>
+	{% endif %}
+	{% if settings.google_maps and offer.address_lat!=0 and offer.address_long!=0 %}
+		<script>
+			function displayMap() {
+				google.maps.event.addDomListener(window, "load", function() {
+					var myLatlng = new google.maps.LatLng({{ offer.address_lat }},{{ offer.address_long }});
+					var map = new google.maps.Map(document.getElementById("google_maps"), {
+						zoom: {{ settings.google_maps_zoom_offer|default(10) }},
+						center: myLatlng,
+						mapTypeId: google.maps.MapTypeId.ROADMAP,
+						scrollwheel: false
+					});
+					var marker = new google.maps.Marker({
+						position: myLatlng,
+						map: map,
+						title: '{{ offer.name }}',
+						animation:google.maps.Animation.BOUNCE
+					});
+				})
+			}
+		</script>
+		<script src="https://maps.googleapis.com/maps/api/js?key={{ settings.google_maps_api }}&v=3.exp&libraries=places&callback=initGoogleMap" async defer></script>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div itemscope itemtype="http://schema.org/Product">
+	<div class="background_grey page_box">
+		<div class="container background_white" id="offer">
+			<form method="post" class="float-right">
+				<br>
+				{% if offer.clipboard %}
+					<input type="hidden" name="action" value="clipboard_remove">
+					<input type="hidden" name="token" value="{{ generateToken('clipboard_remove') }}">
+					<input type="submit" value="{{ 'Remove from clipboard'|lang }}" class="btn btn-warning btn-sm">
+				{% else %}
+					<input type="hidden" name="action" value="clipboard_add">
+					<input type="hidden" name="token" value="{{ generateToken('clipboard_add') }}">
+					<input type="submit" value="{{ 'Add to clipboard'|lang }}" class="btn btn-outline-secondary btn-sm">
+				{% endif %}
+			</form><!--Offer.html-->
+			<h1 itemprop="name" style="overflow-wrap: break-word;">{{ offer.name }}</h1>
+			<p>
+				{% if offer.type_name %}[<a href="{{ path('offers') }}?type={{ offer.type_slug }}" title="{{ 'Offer type'|lang }}: {{ offer.type_name }}" class="main-color-2">{{ offer.type_name }}</a>]{% endif %}
+				{% if offer.categories %}
+					{% for category in offer.categories %}
+						<a href="{{ path('offers') }}?category={{ category.id }}" title="{{ 'Category'|lang }}: {{ item.name }}" class="main-color-2"><span {% if loop.last %}itemprop="category"{% endif %}>{{ category.name }}</span></a>
+						{% if not loop.last %} > {% endif %}
+					{% endfor %}
+				{% endif %}
+			</p>
+			{% if not offer.active %}
+				<h5 class="text-danger">{{ 'Offer is inactive'|lang }}</h5>
+				{% if offer_cost.total %}
+					<table class="table table-hover">
+						{% for item in offer_cost.list %}
+							<tr><td>{{ item.name }}: </td><td>{{ item.value|showCurrency }}</td></tr>
+						{% endfor %}
+						<tr><td><b>{{ 'Total'|lang }}: </b></td><td><b>{{ offer_cost.total|showCurrency }}</b></td></tr>
+					</table>
+					<div class="text-center offer_payments">
+						<form method="post">
+							<input type="hidden" name="action" value="new_payment">
+							<input type="hidden" name="item_id" value="{{ offer.id }}">
+							<input type="hidden" name="type" value="add_offer">
+							{% if settings.pay_by_dotpay %}
+								<input type="submit" value="{{ 'Pay by Dotpay'|lang }}" class="btn btn-primary" formaction="{{ settings.base_url }}/php/payment_dotpay.php">
+							{% endif %}
+							{% if settings.pay_by_paypal %}
+								<input type="submit" value="{{ 'Pay by PayPal'|lang }}" class="btn btn-primary" formaction="{{ settings.base_url }}/php/payment_paypal.php">
+							{% endif %}
+							{% if settings.pay_by_p24 %}
+								<input type="submit" value="{{ 'Pay by Przelewy24'|lang }}" class="btn btn-primary" formaction="{{ settings.base_url }}/php/payment_p24.php">
+							{% endif %}
+						</form>
+					<br><br>
+					</div>
+				{% elseif not offer.user_id and not user.moderator %}
+					<h4 class="text-danger">{{ 'You must confirm your email address'|lang }}</h4><br>
+				{% elseif not settings.automatically_activate_offers and not user.moderator %}
+					<h4 class="text-danger">{{ 'It must be approved by an administrator'|lang }}</h4><br>
+				{% else %}
+					<form method="post">
+						<input type="hidden" name="action" value="activate_offer">
+						<input type="hidden" name="token" value="{{ generateToken('activate_offer') }}">
+						<input type="submit" value="{{ 'Activate offer'|lang }}" class="btn btn-primary">
+					</form>
+					<br>
+				{% endif %}
+			{% endif %}
+			{% if user.id==offer.user_id or user.moderator %}
+				<h6><a href="{{ path('edit',offer.id,offer.slug) }}" title="{{ 'Edit offer'|lang }}: {{ offer.name }}" class="text-primary"><i class="fas fa-pencil-alt" style="margin-right:0.5%"></i>{{ 'Edit offer'|lang }}</a> |
+				<a href="{{ path('add') }}/?add_similar={{ offer.id }}" title="{{ 'Add similar'|lang }}: {{ offer.name }}" class="text-success"><i class="fas fa-plus"style="margin-right:0.5%"></i>{{ 'Add similar'|lang }}</a></h6><br>
+			{% endif %}
+			{% include 'alert.tpl' %}
+			<div class="row">
+				<div class="col-md-6">
+					{% if offer.photos %}
+						<div id="offer_photos">
+							{% for photo in offer.photos %}
+								{% if loop.index==1 %}
+									<a href="upload/photos/{{ photo.folder }}{{ photo.url }}" title="{{ offer.name }}" data-lightbox="offer_photos" data-title="{{ offer.name }}"><img src="upload/photos/{{ photo.folder }}{{ photo.url }}" alt="{{ offer.name }}" onerror="this.src='{{ settings.base_url }}/views/{{ settings.template }}/images/{{offer.categories[0].name}}no_image.png'" itemprop="image" class="big"></a><br>
+								{% else %}
+									<a href="upload/photos/{{ photo.folder }}{{ photo.url }}" title="{{ offer.name }}" data-lightbox="offer_photos" data-title="{{ offer.name }}"><img src="upload/photos/{{ photo.folder }}{{ photo.thumb }}" alt="{{ offer.name }}" onerror="this.src='{{ settings.base_url }}/views/{{ settings.template }}/images/{{offer.categories[0].name}}no_image.png'" itemprop="image"></a>
+								{% endif %}
+							{% endfor %}
+						</div>
+					{% else %}
+						<img src="{{ settings.base_url }}/views/{{ settings.template }}/images/{{offer.categories[0].name}}no_image.png" alt="No photo" class="img-thumbnail"><br><br>
+					{% endif %}
+				</div>
+				<div class="col-md-6">
+					<div id="offer_panel">
+						<p class="text-muted small" style="margin-bottom:0"><i class="fas fa-clock"></i>{{ 'Published'|lang }}: {{ offer.date|date("d-m-Y") }} | {{ 'Expire'|lang }}: {{ offer.date_finish|date("d-m-Y") }}</p>
+						{% if not settings.hide_views %}<p class="text-muted small"><i class="far fa-eye"></i>{{ 'View count'|lang }}: {{ offer.view_all }} ({{ 'unique'|lang }}: {{ offer.view_unique }})</p>{% endif %}
+						{% if offer.price_free %}
+							<h3 class="main-color-1"><b>{{ 'For free'|lang }}</b></h3>
+						{% elseif offer.price>0 %}
+							<h3 class="main-color-1"><b>{{ 'Price'|lang }}:</b> <span>{{ offer.price|showCurrency }}</span> {% if offer.price_negotiate %}<span class="small">({{ 'to negotiate'|lang }})</span>{% endif %}</h3>
+						{% endif %}
+						<div class="table-responsive">
+							<table class="table table-sm table-hover">
+								{% if offer.username %}<tr><td><i class="far fa-user-circle"></i>{{ 'Added by'|lang }}: </td><td><a href="{{ path('profile',0,offer.username) }}" title="{{ 'Profile of'|lang }}: {{ offer.username }}" class="main-color-2">{% if offer.user_avatar %}<img src="upload/avatars/{{ offer.user_avatar }}" alt="{{ 'Avatar'|lang }}" class="img-fluid"> {% endif %}{{ offer.username }}</a></td></tr>{% endif %}
+
+
+								{% if offer.state_name %}<tr><td><i class="fas fa-map"></i>{{ 'State'|lang }}: </td><td><a href="{{ path('offers') }}?state={{ offer.state_slug }}" title="{{ 'State'|lang }}: {{ offer.state_name }}" class="main-color-2">{{ offer.state_name }}</a> {% if offer.state2_name %}<a href="{{ path('offers') }}?state={{ offer.state_slug }}&state2={{ offer.state2_slug }}" title="{{ 'State'|lang }}: {{ offer.state2.name }}" class="main-color-2">{{ offer.state2_name }}</a></td></tr>{% endif %}</td></tr>{% endif %}
+								{% if settings.hide_data_not_logged and not user.id %}
+									<tr><td colspan="2"><a href="{{ path('login') }}?redirect={{ offer.id }},{{ offer.slug }}" title="{{ 'Log in on the website'|lang }}" class="main-color-1">{{ 'You must be logged in to view contact details'|lang }}</a></td></tr>
+								{% else %}
+									{% if offer.address %}<tr><td><i class="fas fa-map-marker-alt"></i>{{ 'Address'|lang }}: </td><td>{{ offer.address }}</td></tr>{% endif %}
+
+                                    <!--Dodawanie telefonu w ogłoszeniu-->
+									{% if offer.phone %}
+										<tr><td><i class="fas fa-phone"></i>{{ 'Phone'|lang }}: </td><td><a href="{% if not settings.hide_phone %}tel:{{ offer.phone }}{% endif %}" 
+											title="{{ 'Call us'|lang }}" 
+											class="main-color-2">{% if settings.hide_phone %}<span 
+											class="show_hidden_data" 
+											data-type="phone" 
+											data-data="{{ offer.phone }}">{{ 'show phone...'|lang }}</span>{% else %}<span 
+											itemprop="telephone">{{ offer.phone }}</span>{% endif %}</a></td></tr>
+									{% endif %}
+
+                                     <!--Dodawanie e-maila w ogłoszeniu-->
+									{% if not settings.hide_email %}
+										<tr><td><i class="fas fa-at"></i>{{ 'E-mail'|lang }}: </td><td><a href="" 
+											title="{{ 'Contact us'|lang }}" 
+											class="main-color-2"><span 
+											class="show_hidden_data" 
+											data-type="email" 
+											data-data_0="{{ offer.email_part_0 }}" 
+											data-data_1="{{ offer.email_part_1 }}">{{ 'show e-mail...'|lang }}</span>
+										</a></td></tr>
+									{% endif %}
+
+									<!--Dodawanie strowny web-->
+									<!--{% if not settings.hide_url %}
+										<tr><td>{{ 'Url'|lang }}: </td><td><a href="" 
+											title="{{ 'Visit us on'|lang }}" 
+											class="main-color-2"><span 
+											class="show_hidden_data" 
+											data-type="url" 
+											data-data="{{ offer.url }}">{{ 'show url...'|lang }}</span>
+										</a></td></tr>
+									{% endif %}-->
+									
+								{% endif %}
+								{% if offer.options %}
+									{% for key,option in offer.options %}
+										<tr itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue"><td><small itemprop="name"><i class="fas fa-info"></i>{{ key }}: </small></td><td><small itemprop="value">{% for key2, item in option %}{% if key2 %}, {% endif %}{{ item }}{% endfor %}</small></td></tr>
+									{% endfor %}
+								{% endif %}
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="offer_box_description">
+				<ul class="nav nav-tabs" role="tablist">
+					<li class="nav-item active"><a href="#description" class="nav-link active main-color-2" data-toggle="tab" role="tab" aria-controls="description" aria-selected="true"title="Opis ogłoszenia">{{ 'Description'|lang }}
+							
+					</a></li>
+					{% if settings.show_contact_form_offer %}
+						<li class="nav-item"><a href="#contact_form" class="nav-link main-color-2" data-toggle="tab" role="tab" aria-controls="contact_form" aria-selected="false"title="Kontakt do ogłoszenia">{{ 'Contact form'|lang }}
+							
+						</a></li>
+					{% endif %}
+					{% if (not settings.promote_only_by_author or (offer.user_id==user.id and user.id)) and (settings.pay_by_dotpay or settings.pay_by_paypal or settings.pay_by_p24) %}<!--promowanie ogłoszenia-->
+						<li class="promuj"><a href="#promote" class="nav-link main-color-2" data-toggle="tab" role="tab" aria-controls="promote" aria-selected="false"title="Promuj ogłoszenie">{{ 'Promote'|lang }}
+							</a></li>
+					{% endif %}
+				 </ul>
+				 <div class="tab-content">
+					<div class="tab-pane container active overflow_auto" id="description" role="tabpanel" aria-labelledby="description-tab"><br>{{ offer.description|raw }}</div>
+					{% if settings.show_contact_form_offer %}
+						<div class="tab-pane container fade" id="contact_form" role="tabpanel" aria-labelledby="contact_form-tab">
+							<br>
+							{% include 'contact_form.tpl' %}
+							<br>
+						</div>
+					{% endif %}
+					{% if (not settings.promote_only_by_author or (offer.user_id==user.id and user.id)) and (settings.pay_by_dotpay or settings.pay_by_paypal or settings.pay_by_p24) %}
+						<div class="tab-pane container fade" id="promote" role="tabpanel" aria-labelledby="promote-tab">
+							<br>
+							{% if offer.active %}
+								{% if offer.promoted %}
+									<h5 class="text-success">{{ 'Offer is promoted to'|lang }} {{ offer.promoted_date_end|date("d-m-Y") }}<i class="fa fa-cog fa-spin fa-3x fa-fw" style="font-size:.8em;"></i></h5>
+								{% else %}
+									<h5 class="text-danger">{{ 'Offer is no promoted'|lang }} <i class="far fa-frown"style="color:tomato"></i></h5>
+								{% endif %}
+								<h4><span id="Summary">{{ 'Promote offer'|lang }}: {{ settings.promote_cost|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }}</span></h4>
+								<form action="#" method="post"id="chose-promo"><!-- id="chose-promo"do poprawy i sprawdzeni czy działa-->
+								<div class="row"><!--Promowanie lokalne-->
+									<div class="col-xl-12"><div class="row"><div class="col-sm-6"><label class="checkbox-inline"><input type="checkbox" class="promo-checkbox" name="check"id="chose-promo" checked onclick="onlyOne(this)"value="1" onchange="PopulateValues()"> <b>Promowanie lokalne</b> <spam style="color:gold;"><i class="fas fa-star"></i></spam><h6>{{ 'Promote offer'|lang }}: {{ settings.promote_cost|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }}</h6></label></div>
+									<div class="col-sm-6">
+									<label class="checkbox-inline"style="font-size:25px;"><input type="checkbox"id="chose-promo" class="promo-checkbox" name="check"onclick="onlyOne(this,0)" onchange="PopulateValues()" value="2"> {{ settings.promote_cost_0|showCurrency }} / {{ settings.promote_days02 }} dni</label><!--60 dni-->
+									</div>							
+									</div>	
+										<ul class="list-group">
+											<li class="list-group-item list-group-item-primary">- Promowane na listach miast i miejscowości <b>{{ offer.state_name }} {% if offer.state2_name %}{{ offer.state2_name }}{% endif %}</b>
+											</li> 
+											<li class="list-group-item list-group-item-primary">- Wyróżnione kolorem na listach ogłoszeń i wyszukiwania</li> 
+											<li class="list-group-item list-group-item-primary">- Promowane na górze listy ogłoszeń i wyszukiwania</li>						
+										</ul></div>
+										<hr>
+								<!--Promowanie regionalne-->
+									<div class="col-xl-12"><div class="row"><div class="col-sm-6"><label class="checkbox-inline"><input type="checkbox"onchange="PopulateValues()" class="promo-checkbox" name="check"id="chose-promo"onclick="onlyOne(this)"value="3"> <b>Promowanie regionalne</b> <spam style="color:gold;"><i class="fas fa-star"></i><i class="fas fa-star"></i></spam><h6>{{ 'Promote offer'|lang }}: {{ settings.promote_cost1|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }}</h6></label></div>
+									<div class="col-sm-6">
+										<label class="checkbox-inline"style="font-size:25px;"><input type="checkbox" name="check"id="chose-promo"onclick="onlyOne(this)"onchange="PopulateValues()"value="4" class="promo-checkbox"> {{ settings.promote_cost1_5|showCurrency }} / {{ settings.promote_days02 }} dni</label><!--60 dni-->	
+										</div>	
+									</div>
+										<ul class="list-group">
+											<li class="list-group-item list-group-item-success">
+												- Promowane na listach miast, miejscowości i powiatów w odległości <b>100km od wybranej miejscowości</b></li><li class="list-group-item list-group-item-success">- Wyróżnione kolorem na listach ogłoszeń i wyszukiwania</li><li class="list-group-item list-group-item-success">- Promowane na górze listy ogłoszeń i wyszukiwania</li>							
+											</ul></div>
+											<hr>
+								<!--Promowanie ogólnopolskie-->
+									<div class="col-xl-12"><div class="row"><div class="col-sm-6"><label class="checkbox-inline"><input type="checkbox"id="chose-promo"name="check"onclick="onlyOne(this)"onchange="PopulateValues()"value="5" class="promo-checkbox"> <b>Promowanie ogólnopolskie</b> <spam style="color:gold;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></spam><h6>{{ 'Promote offer'|lang }}: {{ settings.promote_cost2|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }}</h6></label></div>
+									<div class="col-sm-6">
+										<label class="checkbox-inline"style="font-size:25px;"><input type="checkbox"id="chose-promo" name="check"onclick="onlyOne(this)"onchange="PopulateValues()"value="6" class="promo-checkbox"> {{ settings.promote_cost2_5|showCurrency }} / {{ settings.promote_days02 }} dni</label><!--60 dni-->	
+										</div>		
+									</div>
+										<ul class="list-group">
+											<li class="list-group-item list-group-item-info">- <b>Promowane na listach wszystkich miast, powiatów i województw</b> </li><li class="list-group-item list-group-item-info">- Wyróżnione kolorem na listach ogłoszeń i wyszukiwania</li><li class="list-group-item list-group-item-info">- Promowane na górze listy ogłoszeń i wyszukiwania</li>
+										</ul>
+									</div>
+									<hr>
+								  </div>
+								<div class="offer_payments">
+									<!-- <form method="post"> -->
+										<input type="hidden" name="action" value="new_payment">
+										<input type="hidden" name="item_id" value="{{ offer.id }}">
+										<input type="hidden" name="type" value="promote">
+										<input type="hidden" name="total" value="0" id="total">
+										<input type="hidden" name="days" value="0" id="days">
+										<input type="hidden" name="offerType" value="0" id="offerType">
+										{% if settings.pay_by_dotpay %}
+											<input type="submit" value="{{ 'Pay by Dotpay'|lang }}" class="btn btn-info" formaction="{{ settings.base_url }}/php/payment_dotpay.php">
+										{% endif %}
+										{% if settings.pay_by_paypal %}
+											<input type="submit" value="{{ 'Pay by PayPal'|lang }}" class="btn btn-success" formaction="{{ settings.base_url }}/php/payment_paypal.php">
+										{% endif %}
+										{% if settings.pay_by_p24 %}											<input type="submit" value="{{ 'Pay by Przelewy24'|lang }}" class="btn btn-primary" formaction="{{ settings.base_url }}/php/payment_p24.php">
+										{% endif %}
+									</form>
+								</div>
+								<br>
+								<div class="payment">
+										<img src="https://targowisko.org/views/default/images/pay/dotpay_logo.png" class="rounded float-left" alt="Dotpay" title="Zapłać za pomocą dotpay">
+										<img src="https://targowisko.org/views/default/images/pay/paypal_logo.png" class="rounded float-left" alt="PayPal" title="Zapłać za pomocą PayPal">
+									<br>
+								</div>
+							{% else %}
+								<h5 class="text-danger">{{ 'To promote offer it must be active!'|lang }}</h5>
+							{% endif %}
+						</div>
+					{% endif %}
+				</div>
+				{% if settings.social_facebook %}
+				<!--<div class="social"><a href="" type="button" role="button"class="btn-floating btn-lg share-btn "title="Powiedz przyjaciołom o nas."><i class="fas fa-share-alt"></i></a></div>-->
+					<div class="social_inline_block" style="padding-top:2px">
+						<div class="fb-like" data-href="{{ path('offer',offer.id,offer.slug) }}" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
+					</div>
+				{% endif %}
+				{% if settings.social_twitter %}
+					<div class="social_inline_block">
+						<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{ path('offer',offer.id,offer.slug) }}" data-lang="{{ settings.lang }}">Tweet</a>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+					</div>
+				{% endif %}
+				{% if settings.social_wykop %}
+					<div class="social_inline_block">
+						<script>
+							var widget_url='https://www.wykop.pl/dataprovider/diggerwidget/?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)+'&desc='+encodeURIComponent('{{ settings.description }}')+'&bg='+('FFFFFF')+'&type='+('compact2')+'&bold='+(true);
+							document.write('<div><iframe src="'+widget_url+'" style="border:none;width:100px;height:20px;overflow:hidden;margin:0;padding:0;" frameborder="0" border="0"></iframe></div>');
+						</script>
+					</div>
+				{% endif %}
+				{% if settings.social_google_plus %}
+					<div class="social_inline_block">
+						<script src="https://apis.google.com/js/platform.js" async defer></script>
+						<div class="g-plusone" data-size="medium"></div>
+					</div>
+				{% endif %}
+				{% if settings.social_pinterest %}
+					<div class="social_inline_block" style="padding-top: 2px;">
+						<a href="//www.pinterest.com/pin/create/button/?url={{ path('offer',offer.id,offer.slug) }}" data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" alt="Pinterest"/></a>
+						<script async src="//assets.pinterest.com/js/pinit.js"></script>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	{% if settings.google_maps and offer.address_lat!=0 and offer.address_long!=0 %}
+		<div id="google_maps"></div>
+	{% endif %}
+	{% if offers %}
+		<div class="container">
+			<br>
+			<div class="similar">
+			<h2 class="text-center">{{ 'Similar offers'|lang }}</h2></div><br>
+			{% include 'offers_index.tpl' %}
+		</div>
+		<br><br>
+	{% endif %}
+</div>
+{% endblock %}

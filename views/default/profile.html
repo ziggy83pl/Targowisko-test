@@ -1,0 +1,45 @@
+
+{% extends "main.tpl" %}  
+
+{% block content %}
+<div class="profile_background">
+<div class="page_box background_grey">
+	<div class="container background_white">
+		<div class="text-center">
+			<br><h2>{{ 'Profile of'|lang }}: {{ profile.username }}</h2>
+			<h4><a href="{{ path('offers') }}?search&username={{ profile.username }}" title="{{ 'See all offers added by this user'|lang }}">{{ 'See all offers added by this user'|lang }}</a></h4>
+		</div>
+		{% if profile.avatar %}<br><div class="text-center"><img src="upload/avatars/{{ profile.avatar }}" alt="{{ 'Avatar'|lang }}" onerror="this.src='{{ settings.base_url }}/views/{{ settings.template }}/images/no_image.png'"></div>{% endif %}
+		{% if profile.description %}
+			<br>{{ profile.description|raw }}<br>
+		{% endif %}
+		<br>
+		<h4 class="text-center">{{ 'Statistics'|lang }} <i class="far fa-chart-bar"></i></h4>
+		<table class="table table-striped table-bordered" style="width: auto !important; margin: auto;">
+			<tr><td>{{ 'Username'|lang }}:</td><td>{{ profile.username }}</td></tr>
+			<tr><td>{{ 'Number of offers'|lang }}:</td><td>{{ profile.number_offers }}</td></tr>
+			<tr><td>{{ 'Amount logins'|lang }}:</td><td>{{ profile.number_login }}</td></tr>
+			{% if profile.last_login %}
+				<tr><td>{{ 'Last login'|lang }}:</td><td>{{ profile.last_login|date("d-m-Y") }}</td></tr>
+			{% endif %}
+			<tr><td>{{ 'Date of registration'|lang }}:</td><td>{{ profile.date|date("d-m-Y") }}</td></tr>
+		</table>
+		{% if settings.allow_comments_fb_profile %}
+			<br><br>
+			<div class="text-center">
+				<div class="fb-comments" data-href="{{ path('profile',0,profile.username) }}" data-numposts="15"></div>
+			</div>
+		{% endif %}
+		<br><br>
+		{% if settings.show_contact_form_profile %}
+			<h2 class="text-center">{{ 'Contact form'|lang }}</h2>
+			<br>
+			{% include 'alert.tpl' %}
+			{% include 'contact_form.tpl' %}
+			<br><br><br>
+		{% endif %}
+	</div>
+</div>
+</div>
+{% endblock %}
+

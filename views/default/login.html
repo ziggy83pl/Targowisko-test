@@ -1,0 +1,166 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<!--backgraund image start class="view2" style="background-image: url('https://targowisko.org/views/default/images/backgraund/backgraund1.jpg'); background-repeat: no-repeat; background-size: cover; background-position: center center;"-->
+<div backgraund image start class="view2" style="background-image: url('https://source.unsplash.com/1600x900/?poland'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
+<div class="page_box">
+	<br>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6">
+				<div id="login_box">
+					<ul class="nav nav-tabs" role="tablist">
+						<li class="nav-item {% if tab_active=='login' %}active{% endif %}"><a href="#login" class="nav-link main-color-2 {% if tab_active=='login' %}active{% endif %}"  data-toggle="tab" role="tab" aria-controls="login" aria-selected="{% if tab_active=='login' %}true{% else %}false{% endif %}">{{ 'Log in'|lang }}</a></li>
+						<li class="nav-item {% if tab_active=='register' %}active{% endif %}"><a href="#register" class="nav-link main-color-2 {% if tab_active=='register' %}active{% endif %}" data-toggle="tab" role="tab" aria-controls="register" aria-selected="{% if tab_active=='register' %}true{% else %}false{% endif %}">{{ 'Register'|lang }}</a></li>
+						<li class="nav-item {% if tab_active=='reset_password' %}active{% endif %}"><a href="#reset_password" class="nav-link main-color-2 {% if tab_active=='reset_password' %}active{% endif %}" data-toggle="tab" role="tab" aria-controls="reset_password" aria-selected="{% if tab_active=='reset_password' %}true{% else %}false{% endif %}">{{ 'Reset password'|lang }}</a></li>
+					 </ul>
+					 {% if alert_success or alert_danger %}<br>{% endif %}
+					 {% include 'alert.tpl' %}
+					 <div class="tab-content">
+						<div class="tab-pane container {% if tab_active=='login' %}active{% else %}fade{% endif %}" id="login" role="tabpanel" aria-labelledby="login-tab">
+							{% if form_complete_data %}
+								<form method="post">
+									<input type="hidden" name="action" value="complete_data">
+									<h3>{{ 'Complete data'|lang }}</h3>
+									<h5>{{ 'To continue, enter the login you want to use on the site'|lang }}</h5><br>
+									<div class="form-group">
+										<label for="email">{{ 'E-mail address'|lang }}</label>
+										<input type="email" class="form-control" name="email" disabled value="{{ form_complete_data.email }}">
+									</div>
+									<div class="form-group">
+										<label for="username">{{ 'Username'|lang }}</label>
+										<input type="text" class="form-control" name="username" placeholder="{{ 'Username'|lang }}" required maxlength="64" value="{{ input.username }}" title="{{ 'Enter your username. Use only characters:'|lang }} a-zA-Z0-9-_" pattern="[a-zA-Z0-9-_]+">
+									</div>
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="rules" required {% if input.rules %}checked{% endif %}> {{ 'Accepts the terms and conditions and the privacy policy'|lang }}
+											<p><a href="{{ path('rules') }}" title="{{ 'Terms of service'|lang }}" target="_blank" class="main-color-2">{{ 'Terms of service'|lang }}</a> - <a href="{{ path('privacy_policy') }}" title="{{ 'Privacy policy'|lang }}" target="_blank" class="main-color-2">{{ 'Privacy policy'|lang }}</a></p>
+										</label>
+									</div>
+									<input type="submit" class="btn btn-primary text-uppercase" value="{{ 'Save'|lang }}">
+								</form>
+							{% else %}
+								<form method="post" action="{{ path('login') }}{% if get.redirect %}?redirect={{ get.redirect }}{% endif %}">
+									<input type="hidden" name="action" value="login">
+									<input type="hidden" name="session_code" value="{{ session_code }}">
+									<h3>{{ 'Log in'|lang }}</h3><br>
+									<div class="form-group">
+										<label for="username"><i class="fas fa-user"></i> {{ 'Username / email'|lang }}</label>
+										<input type="text" class="form-control" name="username" placeholder="{{ 'example@example.com'|lang }}" required value="{{ post.username }}" title="{{ 'Enter your username or e-mail'|lang }}">
+									</div>
+									<div class="form-group">
+										<label for="password"><i class="fas fa-key"></i> {{ 'Password'|lang }}</label>
+										<input type="password" class="form-control" name="password" placeholder="****" required title="{{ 'Enter your password'|lang }}">
+									</div>
+									<input type="submit" class="btn btn-1 text-uppercase" value="{{ 'Log in'|lang }}">
+									{% if facebook_redirect_uri or google_redirect_uri %}<br><br>{% endif %}
+									{% if facebook_redirect_uri %}
+										<a href="{{ facebook_redirect_uri }}" title="{{ 'Log in by FB'|lang }}" class="btn btn-primary text-uppercase btn-sm">{{ 'Log in by FB'|lang }}</a>
+									{% endif %}
+									{% if google_redirect_uri %}
+										<a href="{{ google_redirect_uri }}" title="{{ 'Log in by Google'|lang }}" class="btn btn-danger text-uppercase btn-sm">{{ 'Log in by Google'|lang }}</a>
+									{% endif %}
+								</form>
+							{% endif %}
+						</div>
+						<div class="tab-pane container {% if tab_active=='register' %}active{% else %}fade{% endif %}" id="register" role="tabpanel" aria-labelledby="register-tab">
+							<form method="post" action="{{ path('login') }}">
+								<input type="hidden" name="action" value="register">
+								<h3>{{ 'Register'|lang }}</h3><br>
+								{% if error.email %}
+									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.email }}</div>
+								{% endif %}
+								<div class="form-group">
+									<label for="email">{{ 'E-mail address'|lang }}</label>
+									<input type="email" class="form-control" name="email" placeholder="{{ 'example@example.com'|lang }}" id="email" required maxlength="64" value="{{ input.email }}" title="{{ 'Enter your email address'|lang }}">
+								</div>
+								{% if error.username %}
+									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.username }}</div>
+								{% endif %}
+								<div class="form-group">
+									<label for="username">{{ 'Username'|lang }}</label>
+									<input type="text" class="form-control" name="username" placeholder="{{ 'Username'|lang }}" required maxlength="64" value="{{ input.username }}"title="{{ 'Enter your username. Use only characters:'|lang }} a-zA-Z0-9-_" pattern="[a-zA-Z0-9-_]+">
+								</div>
+								{% if error.password %}
+									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.password }}</div>
+								{% endif %}
+								<div class="form-group">
+									<label for="password">{{ 'Password'|lang }}</label>
+									<input type="password" class="form-control" name="password" placeholder="****" required maxlength="32" value="{{ input.password }}" title="{{ 'Enter your password'|lang }}">
+								</div>
+								<div class="form-group">
+									<label for="password_repeat">{{ 'Repeat password'|lang }}</label>
+									<input type="password" class="form-control" name="password_repeat" placeholder="****" id="password_repeat" required maxlength="32" title="{{ 'Here repeat your password'|lang }}">
+								</div>
+								{% if error.rules %}
+									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.rules }}</div>
+								{% endif %}
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="rules" required {% if input.rules %}checked{% endif %}> {{ 'Accepts the terms and conditions and the privacy policy'|lang }}
+										<p><a href="{{ path('rules') }}" title="{{ 'Terms of service'|lang }}" target="_blank" class="main-color-2">{{ 'Terms of service'|lang }}</a> - <a href="{{ path('privacy_policy') }}" title="{{ 'Privacy policy'|lang }}" target="_blank" class="main-color-2">{{ 'Privacy policy'|lang }}</a></p>
+									</label>
+								</div>
+								{% if error.captcha %}
+									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.captcha }}</div>
+								{% endif %}
+								<div class="form-group">
+									<label for="captcha">{{ 'Enter the code Captcha'|lang }}</label>
+									<br>
+									<img src="{{ path('captcha') }}" alt="captcha">
+									<input type="text" class="form-control" placeholder="abc123" title="{{ 'Enter the code Captcha'|lang }}" name="captcha" required maxlength="32">
+								</div>
+								<input type="submit" class="btn btn-1 text-uppercase" value="{{ 'Register'|lang }}">
+							</form>
+						</div>
+						<div class="tab-pane container {% if tab_active=='reset_password' %}active{% else %}{% endif %}" id="reset_password" role="tabpanel" aria-labelledby="reset_password-tab">
+							{% if form_new_password %}
+								<h3>{{ 'Enter a new password'|lang }}</h3><br>
+								<form method="post">
+									<input type="hidden" name="action" value="new_password">
+									<div class="form-group">
+										<input type="text" class="form-control" disabled value="{{ form_new_password.username }}">
+									</div>
+									<div class="form-group">
+										<input type="email" class="form-control" disabled value="{{ form_new_password.email }}">
+									</div>
+									<div class="form-group">
+										<label for="password">{{ 'Enter a new password'|lang }}</label>
+										<input type="password" class="form-control" name="password" placeholder="****" title="{{ 'Enter here a new password'|lang }}" required value="{{ input.password }}" maxlength="32">
+									</div>
+									<div class="form-group">
+										<label for="password_repeat">{{ 'Repeat new password'|lang }}</label>
+										<input type="password" class="form-control" name="password_repeat" placeholder="****" id="password_repeat" title="{{ 'Repeat new password'|lang }}" required maxlength="32">
+									</div>
+									<input type="submit" class="btn btn-1 text-uppercase" value="{{ 'Change password'|lang }}">
+								</form>
+							{% else %}
+								<h3>{{ 'Reset password'|lang }}</h3><br>
+								<form method="post" action="{{ path('login') }}">
+									<input type="hidden" name="action" value="reset_password">
+									<div class="form-group">
+										<label for="username">{{ 'Username / email'|lang }}</label>
+										<input type="text" class="form-control" name="username" placeholder="{{ 'example@example.com'|lang }}" required maxlength="64" value="{{ input.username }}">
+									</div>
+									<div class="form-group">
+										<label for="captcha">{{ 'Enter the code Captcha'|lang }}</label><br>
+										<img src="{{ path('captcha') }}" alt="captcha">
+										<input type="text" class="form-control" placeholder="abc123" title="{{ 'Enter the code Captcha'|lang }}" name="captcha" required maxlength="32" title="{{ 'Enter the code Captcha'|lang }}">
+									</div>
+									<input type="submit" class="btn btn-1 text-uppercase" value="{{ 'Reset password'|lang }}">
+								</form>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				{{ settings.login_page|raw }}
+			</div>
+		</div>
+	</div>
+	<br><br>
+</div>
+</div> <!--backgrand image end-->
+{% endblock %}

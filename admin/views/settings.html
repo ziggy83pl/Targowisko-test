@@ -1,0 +1,306 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-asterisk"></span> {{ 'General settings'|lang }}</h1>
+	<p>{{ 'Here you can edit the settings of the service'|lang }}</p>
+	<p class="text-danger">{{ 'Warning! Certain changes can cause problems with your site!'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<form method="post" class="form-horizontal" role="form">
+	<input type="hidden" name="action" value="save_settings">
+	<input type="hidden" name="token" value="{{ generateToken('admin_save_settings') }}">
+	<div class="form-group">
+		<label for="base_url" class="col-sm-3 control-label">{{ 'Base URL'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="base_url" placeholder="http://example.com" title="{{ 'Enter the url of the site'|lang }}" required value="{{ settings.base_url }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="email" class="col-sm-3 control-label">{{ 'E-mail Administrator'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="email" name="email" placeholder="example@example.com" title="{{ 'Enter e-mail the site administrator'|lang }}" required value="{{ settings.email }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="lang" class="col-sm-3 control-label">{{ 'Website language'|lang }}:</label>
+		<div class="col-sm-9">
+			<select name="lang" title="{{ 'Website language'|lang }}" class="form-control">
+			{% for item in lang_list %}
+				<option value="{{ item }}" {% if item==settings.lang %}selected{% endif %}>{{ item }}</option>
+			{% endfor %}
+		</select>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="title" class="col-sm-3 control-label">{{ 'Page title'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="title" placeholder="..." title="{{ 'Page title'|lang }}" required value="{{ settings.title }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="keywords" class="col-sm-3 control-label">{{ 'Keywords SEO'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="keywords" title="{{ 'Keywords SEO'|lang }}" value="{{ settings.keywords }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="description" class="col-sm-3 control-label">{{ 'Description SEO'|lang }}:</label>
+		<div class="col-sm-9">
+			<textarea name="description" title="{{ 'Description SEO'|lang }}" class="form-control">{{ settings.description }}</textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="analytics" class="col-sm-3 control-label">{{ 'Google Analytics code'|lang }}:</label>
+		<div class="col-sm-9">
+			<textarea name="analytics" title="{{ 'Google Analytics code'|lang }}" class="form-control">{{ settings.analytics }}</textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="number_char_title" class="col-sm-3 control-label">{{ 'Maximum number of characters in the title of the offer'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" name="number_char_title" title="{{ 'Maximum number of characters in the title of the offer'|lang }}" value="{{ settings.number_char_title }}" class="form-control" min="1" max="512" required>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="add_offers_not_logged" title="{{ 'Allow adding offers by not logged'|lang }}" {% if settings.add_offers_not_logged %}checked{% endif %}> {{ 'Allow adding offers by not logged'|lang }}</label><br>
+			<label><input type="checkbox" name="automatically_activate_offers" title="{{ 'Automatically activate added offers (applies to logged users)'|lang }}" {% if settings.automatically_activate_offers %}checked{% endif %}> {{ 'Automatically activate added offers (applies to logged users)'|lang }}</label><br>
+			<label><input type="checkbox" name="enable_articles" title="{{ 'Enable the display of articles'|lang }}" {% if settings.enable_articles %}checked{% endif %}> {{ 'Enable the display of articles'|lang }}</label><br>
+			<label><input type="checkbox" name="rss" title="{{ 'Enable RSS channel'|lang }}" {% if settings.rss %}checked{% endif %}> {{ 'Enable RSS channel'|lang }}</label><br>
+			<label><input type="checkbox" name="generate_sitemap" title="{{ 'Automatically generate a site map (sitemap.xml)'|lang }}" {% if settings.generate_sitemap %}checked{% endif %}> {{ 'Automatically generate a site map (sitemap.xml)'|lang }}</label><br>
+			<label><input type="checkbox" name="check_ip_user" title="{{ 'Check IP user when logging or adding offers'|lang }}" {% if settings.check_ip_user %}checked{% endif %}> {{ 'Check IP user when logging or adding offers'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<label class="col-sm-3 control-label">{{ 'When you add offer'|lang }}:</label>
+		<div class="col-sm-9">
+			<label><input type="checkbox" name="required_type" title="{{ 'Type required'|lang }}" {% if settings.required_type %}checked{% endif %}> {{ 'Type required'|lang }}</label><br>
+			<label><input type="checkbox" name="required_category" title="{{ 'Category required'|lang }}" {% if settings.required_category %}checked{% endif %}> {{ 'Category required'|lang }}</label><br>
+			<label><input type="checkbox" name="required_subcategory" title="{{ 'Subcategory required'|lang }}" {% if settings.required_subcategory %}checked{% endif %}> {{ 'Subcategory required'|lang }}</label><br>
+			<label><input type="checkbox" name="required_phone" title="{{ 'Phone required'|lang }}" {% if settings.required_phone %}checked{% endif %}> {{ 'Phone required'|lang }}</label><br>
+			<label><input type="checkbox" name="required_url" title="{{ 'Url required'|lang }}" {% if settings.required_url %}checked{% endif %}> {{ 'Url required'|lang }}</label><br> <!--Test dodawania url-->
+			<label><input type="checkbox" name="required_address" title="{{ 'Address required'|lang }}" {% if settings.required_address %}checked{% endif %}> {{ 'Address required'|lang }}</label><br>
+			<label><input type="checkbox" name="required_state" title="{{ 'State required'|lang }}" {% if settings.required_state %}checked{% endif %}> {{ 'State required'|lang }}</label><br>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="google_maps" title="{{ 'Show Google Maps'|lang }}" {% if settings.google_maps %}checked{% endif %} class="set_required" data-target="target_google_maps"> {{ 'Show Google Maps'|lang }}</label>
+			<p><a href="https://developers.google.com/maps/documentation/javascript/get-api-key" title="Google Maps API KEY" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_maps_api" class="col-sm-3 control-label">{{ 'Google Maps API'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="google_maps_api" title="{{ 'Google Maps API'|lang }}" value="{{ settings.google_maps_api }}" class="target_google_maps form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_maps_lat" class="col-sm-3 control-label">{{ 'Latitude'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="0.000001" min="-90" max="90" name="google_maps_lat" title="{{ 'Latitude'|lang }}" value="{{ settings.google_maps_lat }}" class="target_google_maps form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_maps_long" class="col-sm-3 control-label">{{ 'Longitude'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="0.000001" min="-180" max="180" name="google_maps_long" title="{{ 'Longitude'|lang }}" value="{{ settings.google_maps_long }}" class="target_google_maps form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_maps_zoom_add" class="col-sm-3 control-label">{{ 'Zoom level (add and edit offer)'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="0" max="19" name="google_maps_zoom_add" title="{{ 'Zoom level (add and edit offer)'|lang }}" value="{{ settings.google_maps_zoom_add }}" class="target_google_maps form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_maps_zoom_offer" class="col-sm-3 control-label">{{ 'Zoom level (show offer)'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="0" max="19" name="google_maps_zoom_offer" title="{{ 'Zoom level (show offer)'|lang }}" value="{{ settings.google_maps_zoom_offer }}" class="target_google_maps form-control">
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<label for="limit_page" class="col-sm-3 control-label">{{ 'Limit offers per page'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="1" name="limit_page"  title="{{ 'Limit offers per page'|lang }}" value="{{ settings.limit_page }}" class="form-control" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="limit_page_index" class="col-sm-3 control-label">{{ 'Limit offers on the home page'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="1" name="limit_page_index" title="{{ 'Limit offers on the home page'|lang }}" value="{{ settings.limit_page_index }}" class="form-control" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="show_similar_offer" title="{{ 'Show similar offers'|lang }}" {% if settings.show_similar_offer %}checked{% endif %}> {{ 'Show similar offers'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="limit_similar_offer" class="col-sm-3 control-label">{{ 'Limit similar offers'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="1" name="limit_similar_offer" title="{{ 'Limit similar offers'|lang }}" value="{{ settings.limit_similar_offer }}" class="form-control" required>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="photo_add" title="{{ 'Allow uploading photos'|lang }}" {% if settings.photo_add %}checked{% endif %}> {{ 'Allow uploading photos'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="photo_max" class="col-sm-3 control-label">{{ 'The maximum number of images (0 - unlimited)'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="0" name="photo_max" title="{{ 'The maximum number of images (0 - unlimited)'|lang }}" value="{{ settings.photo_max }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="photo_max_size" class="col-sm-3 control-label">{{ 'The maximum size of photo (0 - unlimited)'|lang }}:<br><small>{{ 'Photos exceeding the size will be rejected'|lang }}</small></label>
+		<div class="col-sm-9">
+			<div class="input-group">
+				<input type="number" step="1" min="0" name="photo_max_size" title="{{ 'The maximum size of photo (0 - unlimited)'|lang }}" value="{{ settings.photo_max_size }}" class="form-control">
+				<div class="input-group-addon">kB</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="photo_max_height" class="col-sm-3 control-label">{{ 'Maximum height of pictures (0 - unlimited)'|lang }}:<br><small>{{ 'Photos exceeding the size will be reduced'|lang }}</small></label>
+		<div class="col-sm-9">
+			<div class="input-group">
+				<input type="number" step="1" min="0" name="photo_max_height" title="{{ 'Maximum height of pictures (0 - unlimited)'|lang }}" value="{{ settings.photo_max_height }}" class="form-control">
+				<div class="input-group-addon">px</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="photo_max_width" class="col-sm-3 control-label">{{ 'Maximum width of pictures (0 - unlimited)'|lang }}:<br><small>{{ 'Photos exceeding the size will be reduced'|lang }}</small></label>
+		<div class="col-sm-9">
+			<div class="input-group">
+				<input type="number" step="1" min="0" name="photo_max_width" title="{{ 'Maximum width of pictures (0 - unlimited)'|lang }}" value="{{ settings.photo_max_width }}" class="form-control">
+				<div class="input-group-addon">px</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="photo_quality" class="col-sm-3 control-label">{{ 'Picture JPG quality (scale 0 - 100)'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="number" step="1" min="0" max="100" name="photo_quality" title="{{ 'Picture JPG quality (scale 0 - 100)'|lang }}" value="{{ settings.photo_quality }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="watermark_add" title="{{ 'Add a watermark to photos'|lang }}" {% if settings.watermark_add %}checked{% endif %}> {{ 'Add a watermark to photos'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="hide_data_not_logged" title="{{ 'Hide contact information for not logged'|lang }}" {% if settings.hide_data_not_logged %}checked{% endif %}> {{ 'Hide contact information for not logged'|lang }}</label><br>
+			<label><input type="checkbox" name="hide_phone" title="{{ 'Hide phone number'|lang }}" {% if settings.hide_phone %}checked{% endif %}> {{ 'Hide phone number'|lang }}</label><br>
+			<label><input type="checkbox" name="hide_email" title="{{ 'Do not show email address'|lang }}" {% if settings.hide_email %}checked{% endif %}> {{ 'Do not show email address'|lang }}</label><br>
+			<label><input type="checkbox" name="hide_views" title="{{ 'Do not show the number of views'|lang }}" {% if settings.hide_views %}checked{% endif %}> {{ 'Do not show the number of views'|lang }}</label><br>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="mail_attachment" title="{{ 'Allow to post attachments to e-mails'|lang }}" {% if settings.mail_attachment %}checked{% endif %}> {{ 'Allow to post attachments to e-mails'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="smtp" title="{{ 'Send emails via SMTP'|lang }}" {% if settings.smtp %}checked{% endif %} class="set_required" data-target="target_smtp"> {{ 'Send emails via SMTP'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_host" class="col-sm-3 control-label">{{ 'SMTP host'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="text" name="smtp_host" title="{{ 'SMTP host'|lang }}" value="{{ settings.smtp_host }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_mail" class="col-sm-3 control-label">{{ 'SMTP e-mail'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="email" name="smtp_mail" title="{{ 'SMTP e-mail'|lang }}" value="{{ settings.smtp_mail }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_user" class="col-sm-3 control-label">{{ 'SMTP user'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="text" name="smtp_user" title="{{ 'SMTP user'|lang }}" value="{{ settings.smtp_user }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_password" class="col-sm-3 control-label">{{ 'SMTP password'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="text" name="smtp_password" title="{{ 'SMTP password'|lang }}" value="{{ settings.smtp_password }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_port" class="col-sm-3 control-label">{{ 'SMTP port'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="number" min="0" name="smtp_port" title="{{ 'SMTP port'|lang }}" value="{{ settings.smtp_port }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="smtp_secure" class="col-sm-3 control-label">{{ 'SMTP secure'|lang }}: </label>
+		<div class="col-sm-9">
+			<input type="text" name="smtp_secure" title="{{ 'SMTP secure'|lang }}" value="{{ settings.smtp_secure }}" class="target_smtp form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#test_message">{{ 'Send a test message'|lang }}</button>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+		</div>
+	</div>
+</form>
+
+<div class="modal fade" id="test_message" tabindex="-1" role="dialog" aria-labelledby="{{ 'Send a test message'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Send a test message'|lang }}</h4>
+			</div>
+			<form method="post" class="form">
+				<input type="hidden" name="action" value="send_test_message">
+				<input type="hidden" name="token" value="{{ generateToken('admin_send_test_message') }}">
+				<div class="modal-body">
+					<p>{{ 'If you make changes to the SMTP settings, first save the settings!'|lang }}</p>
+					<div class="form-group">
+						<label>{{ 'Email'|lang }}</label>
+						<input type="email" name="email" required value="{{ settings.email }}" class="form-control">
+					</div>
+					<div class="form-group">
+						<label>{{ 'Subject'|lang }}</label>
+						<input type="text" name="subject" required value="{{ 'Test message'|lang }}" class="form-control">
+					</div>
+					<div class="form-group">
+						<label>{{ 'Content'|lang }}</label>
+						<textarea name="message" required class="form-control">{{ 'Test message'|lang }}</textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

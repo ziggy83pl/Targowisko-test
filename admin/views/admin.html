@@ -1,0 +1,203 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="modal fade" id="modal_remove_logs" tabindex="-1" role="dialog" aria-labelledby="{{ 'Remove logs'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Remove logs'|lang }}</h4>
+			</div>
+			<form method="post">
+				<input type="hidden" name="action" value="admin_remove_logs">
+				<input type="hidden" name="token" value="{{ generateToken('admin_remove_logs') }}">
+				<div class="modal-body">
+					<p>{{ 'Sure you want to delete the login logs into the Panel Admin?'|lang }}</p>
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modal_logout" tabindex="-1" role="dialog" aria-labelledby="{{ 'Logout all users'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Logout all users'|lang }}</h4>
+			</div>
+			<form method="post">
+				<input type="hidden" name="action" value="admin_logout_all">
+				<input type="hidden" name="token" value="{{ generateToken('admin_logout_all') }}">
+				<div class="modal-body">
+					<p>{{ 'This will remove from the database all sessions of users'|lang }}</p>
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="page-header">
+	<h1><i class="far fa-user"></i> {{ 'Admin Panel Settings'|lang }}</h1>
+</div>
+{% include 'alert.tpl' %}
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel-form panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="far fa-user"></i> {{ 'Change the access data to the Admin Panel'|lang }}</h3>
+			</div>
+			<form method="post" class="panel-body">
+				<input type="hidden" name="action" value="admin_change_user">
+				<input type="hidden" name="token" value="{{ generateToken('admin_change_user') }}">
+				<div class="form-group">
+					<label for="new_username">{{ 'New username'|lang }}</label>
+					<input type="text" class="form-control" name="new_username" placeholder="administrator" id="new_username" required value="{{ admin.username }}" title="{{ 'New username'|lang }}" maxlength="32">
+				</div>
+				<div class="form-group">
+					<label for="new_password">{{ 'New password'|lang }}</label>
+					<input type="password" class="form-control" name="new_password" placeholder="****" id="new_password" required title="{{ 'New password'|lang }}">
+				</div>
+				<div class="form-group">
+					<label for="repeat_new_password">{{ 'Repeat new password'|lang }}</label>
+					<input type="password" class="form-control" name="repeat_new_password" placeholder="****" id="repeat_new_password" required title="{{ 'Repeat new password'|lang }}">
+				</div>
+				<input type="submit" class="btn btn-success btn-block" value="{{ 'Change the data'|lang }}">
+			</form>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel-form panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="far fa-user"></i> {{ 'Add user'|lang }}</h3>
+			</div>
+			<form method="post" class="panel-body">
+				<input type="hidden" name="action" value="admin_add_user">
+				<input type="hidden" name="token" value="{{ generateToken('admin_add_user') }}">
+				<div class="form-group">
+					<label for="username">{{ 'Username'|lang }}</label>
+					<input type="text" class="form-control" name="username" placeholder="administrator" id="username" required title="{{ 'Username'|lang }}" maxlength="32">
+				</div>
+				<div class="form-group">
+					<label for="password">{{ 'Password'|lang }}</label>
+					<input type="password" class="form-control" name="password" placeholder="****" id="password" required title="{{ 'Password'|lang }}">
+				</div>
+				<div class="form-group">
+					<label for="repeat_password">{{ 'Repeat password'|lang }}</label>
+					<input type="password" class="form-control" name="repeat_password" placeholder="****" id="repeat_password" required title="{{ 'Repeat password'|lang }}">
+				</div>
+				<input type="submit" class="btn btn-primary btn-block" value="{{ 'Add user'|lang }}">
+			</form>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel-form panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="far fa-user"></i> {{ 'List of users Panel Admin'|lang }}</h3>
+			</div>
+			<div class="panel-body">
+				<div class="table-responsive">
+					<table class="table">
+						{% for item in admin_users %}
+							<tr>
+								<td>{{ loop.index }}</td>
+								<td>{{ item.username }}</td>
+								<td class="text-center">{% if item.id!=admin.id %}<a href="#" data-toggle="modal" data-target="#remove_{{ item.id }}" title="{{ 'Delete user'|lang }}"><span class="glyphicon glyphicon-remove"></span></a>{% endif %}</td>
+							</tr>
+{% if item.id!=admin.id %}
+	<div class="modal fade" id="remove_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Delete user'|lang }}">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">{{ 'Delete user'|lang }} {{ item.username }}</h4>
+				</div>
+				<div class="modal-body">
+					<p>Na pewno chcesz usunąć użytkownika {{ item.username }}?</p>
+				</div>
+				<form method="post">
+					<input type="hidden" name="action" value="admin_remove_user">
+					<input type="hidden" name="token" value="{{ generateToken('admin_remove_user') }}">
+					<input type="hidden" name="id" value="{{ item.id }}">
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+						<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endif %}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="panel-form panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="far fa-user"></i> {{ 'Sessions users of Admin Panel'|lang }}</h3>
+			</div>
+			<div class="panel-body">
+				<p>{{ 'Logout all users'|lang }}</p>
+				<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal_logout">{{ 'Log out'|lang }}</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% if admin_logs %}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><i class="far fa-user"></i> {{ 'Logs logon to the Admin Panel'|lang }}</h3>
+		</div>
+		<div class="panel-body">
+			<div class="table-responsive">
+				<table class="table">
+					<tr>
+						<td></td>
+						<td>{{ 'Username'|lang }}
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=username" class="glyphicon glyphicon-sort-by-attributes" title="{{ 'Sort'|lang }}"></a>
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=username&sort_desc" class="glyphicon glyphicon-sort-by-attributes-alt" title="{{ 'Sort descending'|lang }}"></a>
+						</td>
+						<td>{{ 'Logged'|lang }}
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=logged" class="glyphicon glyphicon-sort-by-attributes" title="{{ 'Sort'|lang }}"></a>
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=logged&sort_desc" class="glyphicon glyphicon-sort-by-attributes-alt" title="{{ 'Sort descending'|lang }}"></a>
+						</td>
+						<td>{{ 'Date'|lang }}
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=date" class="glyphicon glyphicon-sort-by-attributes" title="{{ 'Sort'|lang }}"></a>
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=date&sort_desc" class="glyphicon glyphicon-sort-by-attributes-alt" title="{{ 'Sort descending'|lang }}"></a>
+						</td>
+						<td>IP
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=ip" class="glyphicon glyphicon-sort-by-attributes" title="{{ 'Sort'|lang }}"></a>
+							<a href="?{{ pagination.page_url.sort_admin }}&sort=ip&sort_desc" class="glyphicon glyphicon-sort-by-attributes-alt" title="{{ 'Sort descending'|lang }}"></a>
+						</td>
+					</tr>
+					{% for item in admin_logs %}
+						<tr>
+							<td>{{ loop.index+pagination.limit_start }}</td>
+							<td>{{ item.username }}</td>
+							<td>{% if item.logged %}<b>{{ 'Yes'|lang }}</b>{% else %}<span class="text-danger">{{ 'No'|lang }}</span>{% endif %}</td>
+							<td>{{ item.date|date("H:i") }} / <b>{{ item.date|date("d-m-Y") }}</b></td>
+							<td>{{ item.ip }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</div>
+			{% include 'pagination.tpl' %}
+			<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modal_remove_logs">{{ 'Remove logs'|lang }}</button>
+		</div>
+	</div>
+{% endif %}
+{% endblock %}

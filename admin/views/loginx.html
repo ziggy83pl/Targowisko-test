@@ -1,0 +1,39 @@
+
+{% extends "main.tpl" %}
+
+{% block wrapper %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4">
+			<div class="login-form panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title"><i class="far fa-user"></i> {{ 'Login panel'|lang }}</h3>
+				</div>
+				<form method="post" class="panel-body">
+					<a href="" title="- Web Design" target="_blank"><img src="images/Admin.png" alt="Admin Logo" class="img-responsive"></a>
+					<input type="hidden" name="action" value="login">
+					<input type="hidden" name="session_code" value="{{ session_code }}">
+					{% include 'alert.tpl' %}
+					<div class="form-group">
+						<label for="username"><i class="fas fa-sign-in-alt"></i> {{ 'Username'|lang }}</label>
+						<input type="text" class="form-control" name="username" placeholder="administrator" id="username" required title="{{ 'Username'|lang }}">
+					</div>
+					<div class="form-group">
+						<label for="password"><i class="fas fa-key"></i> {{ 'Password'|lang }}</label>
+						<input type="password" class="form-control" name="password" placeholder="****" id="password" required title="{{ 'Password'|lang }}">
+					</div>
+					<input type="submit" class="btn btn-success btn-block" value="{{ 'Log in'|lang }}">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="container-fluid navbar navbar-fixed-bottom">
+	<div class="row">
+		<div class="col-md-12">
+			<p class="text-center small">Admin Panel v5.1 - copyright and project © 2019 - 2021 by <a href="" target="_blank" title="Web Design">Z</a></p>
+		</div>
+	</div>
+</footer>
+{% endblock %}

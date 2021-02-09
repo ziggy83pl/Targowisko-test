@@ -1,0 +1,54 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-edit"></span> {{ 'Mails'|lang }}</h1>
+	<p>{{ 'Edit the content of messages sent from your site'|lang }}</p>
+	<p>{{ 'You should always insert links and image paths along with the domain address (starting with http: //) or the {base_url} tag'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<h4>{{ 'You can use these tags (depending on e-mail)'|lang }}:</h4>
+<ul>
+	<li><b>{title}</b> - {{ 'Title of website'|lang }}</li>
+	<li><b>{base_url}</b> - {{ 'Base URL'|lang }}</li>
+	<li><b>{link_logo}</b> - {{ 'Link to logo'|lang }}</li>
+	<li><b>{date}</b> - {{ 'The current date'|lang }}</li>
+	<li><b>{username}</b> - {{ 'Username'|lang }}</li>
+	<li><b>{activation_link}</b> - {{ 'Activation link'|lang }}</li>
+	<li><b>{password}</b> - {{ 'Hasło'|lang }}</li>
+	<li><b>{reset_password_link}</b> - {{ 'Link to generate new password'|lang }}</li>
+	<li><b>{name}</b> - {{ 'Name of the sender'|lang }}</li>
+	<li><b>{email}</b> - {{ 'Email of the sender'|lang }}</li>
+	<li><b>{message}</b> - {{ 'Message from the sender'|lang }}</li>
+	<li><b>{offer_name}</b> - {{ 'Offer name'|lang }}</li>
+	<li><b>{offer_url}</b> - {{ 'Offer URL'|lang }}</li>
+	<li><b>{offer_edit_link}</b> - {{ 'Link to edit offer'|lang }}</li>
+	<li><b>{offer_activate_link}</b> - {{ 'Link to activate offer'|lang }}</li>
+	<li><b>{offers_list}</b> - {{ 'List of offers'|lang }}</li>
+</ul>
+<br><br>
+<form role="form" class="form-horizontal" method="post">
+	<input type="hidden" name="action" value="save_mails">
+	<input type="hidden" name="token" value="{{ generateToken('admin_save_mails') }}">
+	{% for item in mails %}
+		<div class="form-group">
+			<h4>{{ item.full_name|lang }}</h4>
+			<input type="text" name="mails[{{ item.name }}][subject]" value="{{ item.subject }}" title="{{ 'Enter the message title'|lang }}" placeholder="{{ 'Title'|lang }}" class="form-control">
+		</div>
+		<div class="form-group">
+			<textarea name="mails[{{ item.name }}][message]" id="message_{{ item.name }}" class="form-control">{{ item.message }}</textarea>
+			<script>
+				run_ckeditor('message_{{ item.name }}');
+			</script>
+		</div>
+		<br>
+	{% endfor %}
+	<div class="form-group">
+		<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+	</div>
+</form>
+{% endblock %}
+	

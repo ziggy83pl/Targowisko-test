@@ -1,0 +1,220 @@
+
+{% extends "main.tpl" %}
+    
+{% block javascript %}
+	{{ parent() }}
+	<script src="js/angular.min.js"></script>
+	<script src="js/ckeditor/ckeditor.js"></script>
+	<script src="js/jquery-sortable.js"></script>
+	<script>
+		let photo_max = {{ settings.photo_max|escape('js') }};
+		let list_categories = list_options = [];
+		let inputPrice = '';
+		{% if offer %}
+			list_categories = {{ offer.categories|json_encode()|raw }};
+			{% if offer.options %}list_options = {{ offer.options|json_encode()|raw }}{% endif %};
+			inputPrice = '{{ offer.price|escape('js') }}';
+		{% endif %}
+		let required_category = "{{ settings.required_category|escape('js') }}";
+		let required_subcategory = "{{ settings.required_subcategory|escape('js') }}";
+		var lang = {'Photo limit exceeded':"{{ 'Photo limit exceeded'|lang }}"};
+	</script>
+	<script src="views/{{ settings.template }}/js/add.js?{{ settings.assets_version }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="tlo">
+	<div class="page_box">
+	<div class="shadow">	
+	<div class="container" id="box_add_offer">
+		<div class="text-center">
+			<h1>{{ 'Add offer'|lang }}</h1>
+			<h3>{{ 'Here you can add a new ad to the system'|lang }}</h3>
+		</div>
+		{% include 'alert.tpl' %}
+		<br>
+		{% if not alert_success %}
+		<form method="post" id="form_add_ad" ng-app="addOffer" ng-controller="addOffer" action="">
+			<input type="hidden" name="action" value="{% if offer and not get.add_similar %}edit{% else %}addad{% endif %}">
+			<input type="hidden" name="session_code" value="{{ session_code }}">
+			<div class="form-group row">
+				<label for="name" class="col-sm-3 col-form-label">{{ 'Title'|lang }}:<span class="text-danger">&nbsp;*</span></label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="name" placeholder="{{ 'My title...'|lang }}" id="name" maxlength="{{ settings.number_char_title }}" required {% if offer %}value="{{ offer.name }}" ng-init="inputName='{{ offer.name }}'"{% endif %} title="{{ 'Enter the title'|lang }}" ng-model="inputName" ng-trim="false">
+					<p class="text-muted small" style="margin:2px 2px 0">{{ 'Chars'|lang }}: {{ '{{inputName ? inputName.length : 0}}' }} / {{ settings.number_char_title }}</p>
+				</div>
+			</div>
+
+			<div class="form-group row" ng-repeat="item in list_options track by $index" ng-cloak>
+				<label for="options[{{ '{{item.id}}' }}]" class="col-sm-3  col-form-label ">{{ '{{item.name}}' }}:<span class="text-danger" ng-show="{{ '{{item.required}}' }}">&nbsp;*</span></label>
+				<div class="col-sm-9" ng-switch on="item.kind">
+					<input ng-switch-when="text" class="form-control" type="text" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+					<input ng-switch-when="number" class="form-control" type="number" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+					<select ng-switch-when="select" class="form-control" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+						<option value="">{{ '-- select --'|lang }}</option>
+						<option value="{{ '{{item2}}' }}" ng-repeat="item2 in item.choices">{{ '{{item2}}' }}</option>
+					</select>
+					<div ng-switch-when="checkbox" class="row">
+						<div class="col-sm-6 col-md-4" ng-repeat="item2 in item.choices"><label class="checkbox-inline"><input type="checkbox" name="options[{{ '{{item.id}}' }}][]" value="{{ '{{item2}}' }}" ng-checked="item.value.indexOf(item2) > -1"> {{' {{item2}}' }}</label></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label for="type_id" class="col-sm-3 col-form-label">Typ Promowania: </label>
+				<div class="col-sm-9">
+					<div class="row">
+						<div class="col-lg-4 col-md-6">
+							<select class="form-control" name="type_id" id="type_id" title="{{ 'Select the appropriate offer type'|lang }}" {% if settings.required_type %}required{% endif %}>
+                                  <option value="1">Lokalne, 30 dni - {{ settings.Ad_price_1 }} zl</option>
+                                  <option value="1.50">Lokalne, 60 dni - {{ settings.Ad_price_1_5 }} zl</option>
+                                  <option value="2">Regionalne, 30 dni - {{ settings.Ad_price_2 }} zl</option>
+                                  <option value="2.50">Regionalne, 60 dni - {{ settings.Ad_price_2_5 }} zl</option>
+                                  <option value="3">Ogolnopolskie, 30 dni - {{ settings.Ad_price_3 }} zl</option>
+                                  <option value="3.50">Ogolnopolskie, 60 dni - {{ settings.Ad_price_3_5 }} zl</option>
+							</select>
+						</div>
+						<p class="text-right"><i class="fas fa-info-circle"style="color: #85be51;"></i> Wybierz rodzaj reklamy.</p>
+					</div>
+				</div>
+			</div>
+				
+			<div class="form-group row" style="display: none;">
+				<label for="type" class="col-sm-3 col-form-label">{{ 'The length of the display'|lang }}: </label>
+				<div class="col-lg-3 col-md-6 col-sm-9">
+					<select name="days" class="form-control" required>
+						{% if offersDays %}
+							{% for day in offersDays %}
+								<option value="{{ day.id }}">{{ day.length }} {{ 'days'|lang }} - {{ day.cost|showCurrency }}</option>
+							{% endfor %}
+						{% else %}
+							<option value="0">{{ settings.days_default }} {{ 'days'|lang }}</option>
+						{% endif %}
+					</select>
+				</div>			
+			</div>
+
+
+			<div class="form-group row">
+				{% if states %}
+					<label for="state_id" class="col-sm-3 col-form-label">{{ 'State'|lang }}:{% if settings.required_state %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+						<div class="col-lg-3 col-md-6 col-sm-9">
+						<select class="form-control select_state" name="state_id" id="state_id" title="{{ 'Select the appropriate state'|lang }}" {% if settings.required_state %}required{% endif %}>
+							<option value="">{{ '-- select --'|lang }}</option>
+							{% for key,state in states %}
+								<option value="{{ key }}" {% if (offer and offer.state_id==key) or (not offer and user.id and user.state_id==key) %}selected{% endif %}>{{ state.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					{% for key,state in states %}
+						{% if state.states %}
+							<div class="col-sm-4 substates substate_{{ state.id }}" {% if not ((offer and offer.state_id==key) or (not offer and user.id and user.state_id==key)) %}style="display: none"{% endif %}>
+								<select class="form-control" name="state2_id" title="{{ 'Select the appropriate state'|lang }}" {% if not ((offer and offer.state_id==key) or (not offer and user.id and user.state_id==key)) %}disabled{% endif %} required>
+									<option value="">{{ '-- select --'|lang }}</option>
+									{% for state2 in state.states %}
+										<option value="{{ state2.id }}" {% if (offer and offer.state2_id==state2.id) or (not offer and user.state2_id==state2.id) %}selected{% endif %}>{{ state2.name }}</option>
+									{% endfor %}
+								</select>							
+							</div>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+			</div>
+
+			<div class="form-group row">
+				<label for="email" class="col-sm-3 col-form-label">{{ 'E-mail address'|lang }}:<span class="text-danger">&nbsp;*</span></label>
+				<div class="col-lg-3 col-md-6 col-sm-9">
+					<input type="email"
+					 class="form-control" 
+					 name="email" 
+					 placeholder="{{ 'example@example.com'|lang }}" 
+					 id="email" 
+					 maxlength="64" 
+					 required value="{% if offer %}{{ offer.email }}{% elseif user.id %}{{ user.email }}{% endif %}" 
+					 title="{{ 'Enter your email address'|lang }}" {% if (user.id and not user.moderator) or (offer and not user.moderator) %}readonly{% endif %}>
+				</div>
+			</div>
+			
+			<div class="form-group row">
+			<label for="website" class="col-sm-3 col-form-label"> {{ 'Website'|lang }}: </label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="website" placeholder="www.example.com" id="website" required maxlength="300" title="{{ 'Enter your website'|lang }}">										
+				</div>
+			</div>
+			<div class="form-group row">
+			<label for="facebook" class="col-sm-3 col-form-label"> {{ 'Facebook URL'|lang }}: </label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="facebook" placeholder="www.example.com" id="website" maxlength="300" title="{{ 'Enter your facebook'|lang }}">										
+				</div>
+			</div>				
+			<hr style="margin-bottom: 10px;">
+			<div class="form-group row" style="display:none">
+				<label for="description" class="col-sm-3 col-form-label">{{ 'Offer description'|lang }}:<span class="info1"title="Promuj naszą stronę!"alt="Darmowe ogłoszenia!"></span></label>	
+				<div class="col-sm-9">
+					<textarea id="description" name="description" class="form-control" style="height: 150px">{% if offer %}{{ offer.description|raw }}{% endif %}</textarea>				
+				</div>
+				
+			</div>
+
+			<div class="text-justify text-center"><i class="fas fa-info-circle"style="color: #85be51;"></i>
+				Wybierz wszystkie elementy dodawania reklamy, jeśli nawet to jest reklama ogólnokrajowa, jeżeli nie posiadasz własnej strony web, to dodaj adres z przeglądarki Twojego ogłoszenia z naszej stront Targowisko.
+			  </div>
+			<hr style="margin-top: 10px;">
+			<div class="form-group row">
+				<div class="col-sm-3 col-form-label">
+					<label>{{ 'Photos'|lang }}:</label>
+					{% if settings.photo_max %}<p class="small">{{ 'Limit photos'|lang }}: 1</p>{% endif %}
+				</div>
+				<div class="col-sm-9">
+					<div class="progress" id="photos_progress">
+						<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+							0%
+						</div>
+					</div>
+					<div class="alert alert-danger" role="alert" id="photos_info"></div>
+					<div id="preview_photos">
+						{% if offer.photos %}
+							{% for photo in offer.photos %}
+								<div class="img-thumbnail">
+									<img src="upload/photos/{{ photo.folder }}{{ photo.thumb }}" alt="{{ photo.url }}">
+									<br><a href="#" title="{{ 'Remove photo'|lang }}: {{ photo.url }}" class="remove_photo text-danger">{{ 'Remove'|lang }}</a>
+									<input type="hidden" name="photos[]" value="{{ photo.id }}">
+								</div>
+							{% endfor %}
+						{% endif %}
+						<div id="preview_load"><span class="fas fa-spinner fa-spinner-animate"></span></div>
+					</div>
+					<br>
+					<div>
+					<label for="input_select_photo_ad" class="custom-input_select_photo"title="Tutaj możesz dodać zdjęcia"></label>
+					<input class=".custom-input_select_photo " id="input_select_photo_ad" type="file" name="zdjecie" title="{{ 'Here you can add photos to the offer'|lang }}" multiple accept="image/jpeg, image/png" alt="Dodaj zdjęcie" onclick="document.getElementById('addad').style.display='none'"hidden></div>
+					<div class="text-justify text-center addB" id="addad"title="Dodaj reklamę ogólne krajową, regionalną lub lokalną."><i class="fas fa-info-circle"style="color:#85be51;font-size:2em;"></i> Dodaj zdjęcie o wymiarze 750px na 100px</div>
+					<div style="clear:both;"></div>
+				</div>					
+					
+			</div>
+
+			
+			<div class="form-group text-center">
+				<input type="submit" class="btn btn-primary text-uppercase" value="{{ 'Save'|lang }} i zapłać" ng-disabled="waiting_for_response">
+			</div>
+			<br>
+			<p class="text-left"><span class="text-danger">*</span> - {{ 'required field'|lang }}</p>			<div class="payment">
+				<img src="https://targowisko.org/views/default/images/pay/dotpay_logo.png" class="rounded float-left" alt="Dotpay" title="Zapłać za pomocą dotpay">
+				<img src="https://targowisko.org/views/default/images/pay/paypal_logo.png" class="rounded float-left" alt="PayPal" title="Zapłać za pomocą PayPal">	
+		</div>
+		<br>
+			<br>
+
+		</form>
+
+		
+		{% endif %}
+		
+	</div>
+	</div>
+	</div>
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+
+{% extends "main.tpl" %}
+
+{% block wrapper %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 offset-md-4">
+			<div class="login-form card ">
+				<div class="card-header">
+					<h3 class="card-header"><span class="glyphicon glyphicon-user"></span> {{ 'Login panel'|lang }}</h3>
+				</div>
+				<form method="post" class="card-block">
+					<a href="http://wyremski.pl" title="Kamil Wyremski - Web Design" target="_blank"><img src="images/admin.png" alt="Admin Logo" class="img-fluid"></a>
+					<input type="hidden" name="action" value="login">
+					<input type="hidden" name="session_code" value="{{ session_code }}">
+					{% include 'alert.tpl' %}
+					<div class="form-group">
+						<label for="username">{{ 'Username'|lang }}</label>
+						<input type="text" class="form-control" name="username" placeholder="administrator" id="username" required title="{{ 'Username'|lang }}">
+					</div>
+					<div class="form-group">
+						<label for="password">{{ 'Password'|lang }}</label>
+						<input type="password" class="form-control" name="password" placeholder="****" id="password" required title="{{ 'Password'|lang }}">
+					</div>
+					<input type="submit" class="btn btn-success btn-block" value="{{ 'Log in'|lang }}">
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer class="container-fluid navbar navbar-fixed-bottom">
+	<div class="row">
+		<div class="col-md-12">
+			<p class="text-xs-center small">Admin Panel v5.0 - copyright and project © 2017 - 2018 by <a href="" target="_blank" title="Web Design">Kamil Wyremski</a></p>
+		</div>
+	</div>
+</footer>
+{% endblock %}

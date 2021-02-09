@@ -1,0 +1,162 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+
+<div class="page_box">
+	</div>
+	<!-- {% if slider %}
+		<div id="slider" class="carousel slide carousel-fade d-none d-md-block" data-ride="carousel">
+			<div class="carousel-inner">
+				{% for slide in slider %}
+					<div class="carousel-item {% if loop.first %}active{% endif %}">
+						{{ slide|raw }}
+					</div>
+				{% endfor %}
+			</div>
+			{% if slider|length > 1 %}
+				<a class="carousel-control-prev" href="#slider" role="button" data-slide="prev">
+					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+					<span class="sr-only">Previous</span>
+				</a>
+				<a class="carousel-control-next" href="#slider" role="button" data-slide="next">
+					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+					<span class="sr-only">Next</span>
+				</a>
+			{% endif %}
+		</div>
+	{% endif %} -->
+    	
+	{% include 'search_main.tpl' %}
+	<div class="container cities" title="Popularne miasta">				
+		<div class="Mc-1">
+		   <div><a href="https://targowisko.org/s-mazowieckie/warszawa" title="Warszawa" >Warszawa</a></div>
+		   <div><a href="https://targowisko.org/s-malopolskie/krakow" title="Kraków">Kraków</a></div>
+		   <div><a href="https://targowisko.org/s-lodzkie/lodz" title="Łódź">Łódź</a></div>
+		   <div><a href="https://targowisko.org/s-dolnoslaski/wroclaw" title="Wrocław">Wrocław</a></div>
+		   <div><a href="https://targowisko.org/s-mazowieckie/ostroleka" title="Wrocław">Ostrołęka</a></div>						   
+		</div>
+		<div class="Mc-2">
+			<div><a href="https://targowisko.org/s-wielkopolskie/poznan" title="Poznań">Poznań</a></div>
+			<div><a href="https://targowisko.org/s-pomorskie/gdansk" title="Gdańsk">Gdańsk</a></div>
+			<div><a href="https://targowisko.org/s-zachodniopomorskie/szczecin" title="Szczecin">Szczecin</a></div>
+			<div><a href="https://targowisko.org/s-lubelskie/lublin" title="Lublin">Lublin</a></div>
+			<div><a href="https://targowisko.org/s-wielkopolskie/kalisz" title="Lublin">Kalisz</a></div>							
+		</div>						
+		<div class="Mc-3">
+			<div><a href="https://targowisko.org/s-slaskie/katowice" title="Katowice">Katowice</a></div>
+			<div><a href="https://targowisko.org/s-podlaskie/bialystok" title="Białystok">Białystok</a></div>
+			<div><a href="https://targowisko.org/s-kujawsko-pomorskie/bydgoszcz" title="Bydgoszcz">Bydgoszcz</a></div>
+			<div><a href="https://targowisko.org/s-podlaskie/lomza" title="Wrocław">Łomża</a></div>
+			<div><a href="https://targowisko.org/s-swietokrzyskie/kielce" title="Kielce">Kielce</a></div>
+		</div>					
+		<div class="Mc-4">
+		   <div><a href="https://targowisko.org/s-warminsko-mazurskie/olsztyn" title="Olsztyn">Olsztyn</a></div>
+		   <div><a href="https://targowisko.org/s-podkarpackie/rzeszow" title="Rzeszów" >Rzeszów</a></div>
+		   <div><a href="https://targowisko.org/s-opolskie/opole" title="Opole">Opole</a></div>
+		   <div><a href="https://targowisko.org/s-lubuskie/zielona-gora" title="Zielona Góra">Zielona Góra</a></div>
+		   <div><a href="https://targowisko.org/s-opolskie/nysa" title="Zielona Góra">Nysa</a></div>
+		   <div class="clear: both"; ></div>
+		</div>
+		<div class="Mc-5">
+		<div class="text-center"><a class="btn btn-1" href="https://targowisko.org/wszystkie_miasta" title="Wszystkie miasta">Wszystkie miasta</a></div><br/>
+		<div class="text-center"><a class="btn btn-1" href="https://targowisko.org/dodaj_reklame" title="Dodaj reklamę">Dodaj reklamę</a></div>
+		<div class="clear: both"; ></div>
+		</div>
+	</div>
+	<div id="sale" class="sale_hidden">
+		<a href="{{ path('add') }}" title="{{ 'Add offer'|lang }}" class="sale" ><i class="fas fa-plus"></i></a></div>
+	{% if settings.index_box_subcategories and categories %}
+		<div id="index_categories">
+			<nav class="container">
+					<div class="wrapper">
+				<div class="row">			
+					{% for item in categories %}
+						<div class="col-lg-3 col-md-4 col-sm-6 col-12 index_categories"><a href="{{ path('offers') }}?category={{ item.id }}" title="{{ 'Category'|lang }}: {{ item.name }}" class="{% if item.list_subcategories %}index_show_subcategories{% endif %}" data-id="{{ item.id }}" data-index="{{ loop.index }}">{% if item.thumb %}
+							<img src="{{ item.thumb }}" alt="{{ item.name }}"> {% endif %}<span class="name">{{ item.name }}</span>
+
+							
+
+						</a></div>
+					{% endfor %}
+				</div></div>
+				
+				{% for item in categories %}
+					<div class="index_subcategories col-12" id="index_subcategory_{{ item.id }}">
+						<p>{{ 'See all offers in'|lang }} <a href="{{ path('offers') }}?category={{ item.id }}" title="{{ 'Category'|lang }}: {{ item.name }}"><span class="name">{{ item.name }}{% if settings.show_number_offers_in_categories %} ({{ item.number_offers }})</span>{% endif %}</a></p>
+						{% if item.list_subcategories %}
+							<hr>
+							<div class="row">									
+								{% for item2 in item.list_subcategories %}
+									<div class="col-md-3 index_subcategories_list"><a href="{{ path('offers') }}?category={{ item2.id }}" title="{{ 'Category'|lang }}: {{ item2.name }}">> <span class="name">{{ item2.name }}{% if settings.show_number_offers_in_categories %} ({{ item2.number_offers }}){% endif %}</span></a></div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</nav>
+		</div>
+	{% else %}
+		<br><br>
+	{% endif %}
+	
+	{% if settings.ads_1 %}<div class="ads">{{ settings.ads_1|raw }}</div>{% endif %}
+	
+	{% if offersRandom %}
+		<div class="container">
+			<!--index.html-->
+			<div class="prom">
+			<heder>
+				<h2 class="text-center" alt="ogłoszena promowane" title="Wyróżnij swoje ogłoszenie.">Ogłoszenia promowane</h2>
+				<!--<img src="/upload/images/christmas/presents.png" alt="Choinka">-->
+			</heder></div>
+			{% include 'offers_index_random.tpl' %}
+			<br><br>
+			<div class="btn-below">
+				<!--Media social index-->
+				<div class="social">
+					<!--Facebook-->
+					<a class="btn-floating btn-lg btn-fb" type="button" role="button" href="{{ settings.url_facebook }}" target="_blank" title="Facebook targowisko"><i class="fab fa-facebook-f"></i></a>
+					<!--Twitter-->
+					<a href="https://twitter.com/home" target="_blank" title="Tweeer targowisko" class="btn-floating btn-lg btn-tw" type="button" role="button"><i class="fab fa-twitter"></i></a>
+					<!--Linkedin-->
+					<a href="https://www.linkedin.com/feed/" target="_blank" title="linkedin targowisko" class="btn-floating btn-lg btn-li" type="button" role="button"><i class="fab fa-linkedin-in"></i></a>
+					<!--Instagram-->
+					<a  href="https://www.instagram.com/targowisko_org/" target="_blank" title="Instagram targowisko" class="btn-floating btn-lg btn-ins" type="button" role="button"><i class="fab fa-instagram"></i></a>
+					<!--Pinterest-->
+					<a href="https://pl.pinterest.com/pin/create/button/" target="_blank" title="Pinterest targowisko" class="btn-floating btn-lg btn-pin" type="button" role="button" ><i class="fab fa-pinterest"></i></a>
+				</div></br></br>
+			<div class="btn-best">
+			<div class="text-center">					
+				<a href="{{ path('offers') }}" title="{{ 'Search the best offers'|lang }}" class="btn btn-1">{{ 'See all offers'|lang }}</a>
+			</div></div>
+			</div>
+	</div>		
+	{% endif %}
+		
+	{% if settings.ads_2 %}<div class="ads">{{ settings.ads_2|raw }}</div>{% endif %}
+		
+	{% if settings.ads_3 %}<div class="ads">{{ settings.ads_3|raw }}</div>{% endif %}
+	
+	{% if articles %}
+	<div class="formmedia">
+		<div class="container">
+			<br><br><h3 class="text-center">{{ 'Recent articles'|lang }}</h3>
+			<br><br>
+			{% include 'articles.tpl' %}
+		</div>
+		</div>
+	{% endif %}
+	
+	{% if settings.index_page %}
+	<div id="index_text">
+		<div class="container content">
+			{{ settings.index_page|raw }}
+			<div class="col-lg-4 col-md-6">
+				<p class="text-right"><i class="fas fa-info-circle" style="color: #85be51;"></i> Portal utrzymuje się dzięki Twojemu promowaniu ogłoszeń, promuj ogłoszenie.</p></div>
+		</div>
+	</div>
+{% endif %}
+
+	{% include 'ads.tpl' %}
+{% endblock %}

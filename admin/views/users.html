@@ -1,0 +1,211 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-user"></span> {{ 'Users'|lang }}</h1>
+	<p>{{ 'Here you can see the users. Moderator can edit offers'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<form method="get" class="form-horizontal" role="form">
+	<input type="hidden" name="controller" value="users">
+	<input type="hidden" name="search">
+	<div class="form-group">
+		<div class="col-md-4">
+			<label for="username">{{ 'Username'|lang }}:</label>
+			<input type="text" name="username" title="{{ 'Enter the username'|lang }}" placeholder="{{ 'Username'|lang }}" value="{{ get.username }}" class="form-control">
+		</div>
+		<div class="col-md-4">
+			<label for="email">{{ 'Email'|lang }}:</label>
+			<input type="text" name="email" title="{{ 'Enter the email'|lang }}" placeholder="{{ 'Email'|lang }}" value="{{ get.email }}" class="form-control">
+		</div>
+		<div class="col-md-2">
+			<label for="active">{{ 'Active/2'|lang }}:</label>
+			<select name="active" title="{{ 'Search by active users'|lang }}" class="form-control">
+				<option value="">{{ 'All users'|lang }}</option>
+				<option value="yes" {% if get.active=='yes' %}selected{% endif %}>{{ 'Yes'|lang }}</option>
+				<option value="no" {% if get.active=='no' %}selected{% endif %}>{{ 'No'|lang }}</option>
+			</select>
+		</div>
+		<div class="col-md-2">
+			<label for="moderator">{{ 'Moderator'|lang }}:</label>
+			<select name="moderator" title="{{ 'Search by moderators'|lang }}" class="form-control">
+				<option value="">{{ 'All users'|lang }}</option>
+				<option value="yes" {% if get.moderator=='yes' %}selected{% endif %}>{{ 'Yes'|lang }}</option>
+				<option value="no" {% if get.moderator=='no' %}selected{% endif %}>{{ 'No'|lang }}</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-md-2">
+			<label for="register_fb">{{ 'Register by FB'|lang }}:</label>
+			<select name="register_fb" title="{{ 'Search by registered by Facebook'|lang }}" class="form-control">
+				<option value="">{{ 'All users'|lang }}</option>
+				<option value="yes" {% if get.register_fb=='yes' %}selected{% endif %}>{{ 'Yes'|lang }}</option>
+				<option value="no" {% if get.register_fb=='no' %}selected{% endif %}>{{ 'No'|lang }}</option>
+			</select>
+		</div>
+		<div class="col-md-2">
+			<label for="register_google">{{ 'Register by Google'|lang }}:</label>
+			<select name="register_google" title="{{ 'Search by registered by Google'|lang }}" class="form-control">
+				<option value="">{{ 'All users'|lang }}</option>
+				<option value="yes" {% if get.register_google=='yes' %}selected{% endif %}>{{ 'Yes'|lang }}</option>
+				<option value="no" {% if get.register_google=='no' %}selected{% endif %}>{{ 'No'|lang }}</option>
+			</select>
+		</div>
+		<div class="col-md-4">
+			<label for="date">{{ 'Registration date'|lang }}: </label>
+			<div class="form-inline">
+				<input name="date_from" title="{{ 'Select the starting date'|lang }}" type="text" max="{{ 'now'|date('Y-m-d') }}" value="{{ get.date_from }}" class="form-control datepicker">
+				 -
+				<input name="date_to" title="{{ 'Select the end date'|lang }}" type="text" max="{{ 'now'|date('Y-m-d') }}" value="{{ get.date_to }}" class="form-control datepicker">
+			</div>
+		</div>
+		<div class="col-md-2">
+			<label for="register_ip">{{ 'Registration IP'|lang }}:</label>
+			<input type="text" name="register_ip" title="{{ 'IP address'|lang }}" placeholder="{{ 'IP address'|lang }}" value="{{ get.register_ip }}"{ class="form-control">
+		</div>
+		<div class="col-md-2 text-right">
+			<label>&nbsp;</label><br>
+			<input type="submit" value="{{ 'Search'|lang }}" class="btn btn-primary text-uppercase">
+		</div>
+	</div>
+</form>
+<br>
+{% if users %}
+	<div class="table-responsive">
+		<table class="table parent_select_checkbox table-striped table-bordered table-condensed">
+			<tr>
+				<th class="text-center"><input type="checkbox" class="select_checkbox" title="{{ 'Select all'|lang }}"></th>
+				<th class="text-center">{{ 'ID'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=id" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=id&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Activate'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=active" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=active&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'FB'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_fb" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_fb&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Google'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_google" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_google&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th>{{ 'Username'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=username" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=username&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th>{{ 'Email'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=email" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=email&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Moderator'|lang }}<br>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=moderator" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=moderator&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Amount offers'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_offers" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_offers&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+					<br>
+					({{ 'active'|lang }})
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_active_offers" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_active_offers&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Amount logins'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_logins" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=amount_logins&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+					<br>
+					{{ 'Last'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=last_login" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=last_login&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th>{{ 'Activation date'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=activation_date" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=activation_date&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+					<br>
+					{{ 'Activation IP'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=activation_ip" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=activation_ip&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th>{{ 'Registration date'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=date" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=date&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+					<br>
+					{{ 'Registration IP'|lang }}
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_ip" title="{{ 'Sort'|lang }}" class="glyphicon glyphicon-sort-by-attributes"></a>
+					<a href="?{{ pagination.page_url.sort_admin }}&sort=register_ip&sort_desc" title="{{ 'Sort descending'|lang }}" class="glyphicon glyphicon-sort-by-attributes-alt"></a>
+				</th>
+				<th class="text-center">{{ 'Remove'|lang }}</th>
+			</tr>
+			{% for item in users %}
+				<tr>
+					<td class="text-center"><input type="checkbox" name="users[]" value="{{ item.id }}" form="form_selected_users"></td>
+					<td class="text-center">{{ item.id }}</td>
+					<td class="text-center">{% if not item.active %}<a href="#" title="{{ 'Activate user'|lang }}" class="ajax glyphicon glyphicon-plus-sign" data-action="activate_user" data-id="{{ item.id }}" data-token="{{ generateToken('admin_activate_user') }}"></a>{% endif %}</td>
+					<td class="text-center">{% if item.register_fb %}<img src="images/fb-icon.gif" alt="Facebook">{% endif %}</td>
+					<td class="text-center">{% if item.register_google %}<img src="images/google-icon.ico" alt="Google">{% endif %}</td>
+					<td><b><a href="{{ path('profile',0,item.username) }}" title="{{ 'Profile of'|lang }}: {{ item.username }}" target="_blank">{{ item.username }}</a></b></td>
+					<td>{% if _ADMIN_TEST_MODE_ %}TEST{% else %}<a href="mailto:{{ item.email }}" title="{{ 'Write to:'|lang }} {{ item.email }}">{{ item.email }}</a>{% endif %}</td>	
+					<td class="text-center">{% if item.moderator %}<a href="#" title="{{ 'Unset moderator'|lang }}" class="ajax" data-action="unset_moderator" data-id="{{ item.id }}" data-token="{{ generateToken('admin_unset_moderator') }}">{{ 'YES'|lang }}</b>{% else %}<a href="#" title="{{ 'Set moderator'|lang }}" class="ajax" data-action="set_moderator" data-id="{{ item.id }}" style="color: grey" data-token="{{ generateToken('admin_set_moderator') }}">{{ 'NO'|lang }}</a>{% endif %}</td>
+					<td class="text-center">{{ item.amount_offers }}<br>(<b>{{ item.amount_active_offers }}</b>)</td>
+					<td class="text-center"><b>{{ item.amount_logins }}</b><br>{{ item.last_login|date('Y-m-d') }}</td>
+					<td class="text-center">{{ item.activation_date|date('Y-m-d') }}<br>{{ item.activation_ip }}</td>
+					<td class="text-center">{{ item.date|date('Y-m-d') }}<br>{{ item.register_ip }}</td>
+					<td class="text-center"><a href="#" title="{{ 'Delete user'|lang }}" class="glyphicon glyphicon-remove text-danger" data-toggle="modal" data-target="#remove_{{ item.id }}"></a></td>
+				</tr>
+
+				<div class="modal fade" id="remove_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Delete user'|lang }}: {{ item.username }}">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								<h4 class="modal-title">{{ 'Delete user'|lang }}</h4>
+							</div>
+							<form method="post">
+								<input type="hidden" name="action" value="remove_user">
+								<input type="hidden" name="id" value="{{ item.id }}">
+								<input type="hidden" name="email" value="{{ item.email }}">
+								<input type="hidden" name="register_ip" value="{{ item.register_ip }}">
+								<input type="hidden" name="activation_ip" value="{{ item.activation_ip }}">
+								<input type="hidden" name="token" value="{{ generateToken('admin_remove_user') }}">
+								<div class="modal-body">
+									<p>{{ 'Are you sure you want to delete user'|lang }}: "{{ item.username }}"?</p>
+									<p>{{ 'All offers of user will be deleted'|lang }}</p>
+									<label><input type="checkbox" name="add_email_black_list"> {{ 'Add email to black list'|lang }}</label><br>
+									<label><input type="checkbox" name="add_ip_black_list"> {{ 'Add IP to black list'|lang }}</label>
+								</div>
+								<div class="modal-footer">
+									<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+									<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</table>
+	</div>
+	<br>
+	<form method="post" id="form_selected_users" class="form-inline">
+		<input type="hidden" name="token" value="{{ generateToken('admin_action_users') }}">
+		<label for="action">{{ 'Selected'|lang }}: </label>
+		<select name="action" required title="{{ 'Select the appropriate action'|lang }}" class="form-control">
+			<option value="">-- {{ 'select'|lang }} --</option>
+			<option value="remove_users">{{ 'Remove users'|lang }}</option>
+			<option value="activate_users">{{ 'Activate users'|lang }}</option>
+			<option value="set_moderators">{{ 'Set moderator'|lang }}</option>
+			<option value="unset_moderators">{{ 'Unset moderator'|lang }}</option>
+		</select>
+		<input type="submit" value="{{ 'Execute'|lang }}!" class="btn btn-sm btn-danger">
+	</form>
+
+	{% include 'pagination.tpl' %}
+
+{% else %}
+	<h4 class="text-danger">{{ 'Nothing found'|lang }}</h4>
+{% endif %}
+{% endblock %}

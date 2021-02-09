@@ -1,0 +1,35 @@
+
+{% extends "main.tpl" %}  
+
+{% block content %}
+
+<div class="page_box">
+	<div class="container">
+		<h2>{{ 'Articles'|lang }}</h2>
+		<br>
+		{% include 'articles.tpl' %}
+		{% if articles %}
+			<br>
+			{% include 'pagination.tpl' %}
+		{% endif %}</br>
+		<div class="ads-title" alt="Dodaj reklamę" title="Dodaj reklamę."> 
+			<hr>
+				<a href="https://targowisko.org/dodaj_reklame">	
+					<h2>Dodaj reklamę.</h2>
+				</a>
+					<div class="ads">
+						<a href="https://targowisko.org/dodaj_reklame">
+							<img alt="" src="upload/photos/2019/09//reklama_1.png">		
+						</a>
+									<a class="ads-fb" href="http://www.facebook.com/Targowisko-darmowe-og%C5%82oszenia-1853942881321358/" target="_blank">
+							<i class="fab fa-facebook-f"></i>
+						</a>
+								</div>
+					<hr>
+			</div></br>
+	</div>
+
+</div>
+
+{% endblock %}
+

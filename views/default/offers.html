@@ -1,0 +1,257 @@
+
+{% extends "main.tpl" %}
+
+{% block javascript %}
+	{{ parent() }}
+	{% if settings.google_maps and offers_show_map %}
+		<script>
+			function displayMap() {
+				autocomplete = new google.maps.places.Autocomplete((document.getElementById('search_main_address')), {types: ['geocode']});
+				autocomplete2 = new google.maps.places.Autocomplete((document.getElementById('search_box_address')), {types: ['geocode']});
+				let map = new google.maps.Map(document.getElementById('google_maps'), {
+					center: new google.maps.LatLng({{ settings.google_maps_lat }},{{ settings.google_maps_long }}),
+					zoom: 6,
+					mapTypeId: google.maps.MapTypeId.ROADMAP,
+					scrollwheel:  false
+				});
+				let locations = [
+					{% for offer in offers %}
+						{% if offer.address_lat and offer.address_long %}
+							{name:'{{ offer.name }}', lat:{{ offer.address_lat }}, long:{{ offer.address_long }}, index:{{ loop.index }}, content:'<a href="{{ path('offer',offer.id,offer.slug) }}" title="{{ offer.name }}"><p class="google_maps_p">{{ offer.name|slice(0,40) }}</p>{% if offer.thumb %}<img src="upload/photos/{{ offer.thumb }}" alt="{{ offer.name }}" onerror="this.src=\'{{ settings.base_url }}/views/{{ settings.template }}/images/no_image.png\'" class="google_maps_img">{% endif %}</a>'}{% if not loop.last %},{% endif %}
+						{% endif %}
+					{% endfor %}
+				]
+				let point, before_infoWindows;
+				let bounds = new google.maps.LatLngBounds();
+				let markers = [];
+				for (i = 0; i < locations.length; i++) {
+					latlngset = new google.maps.LatLng(locations[i].lat, locations[i].long);
+					let punkt = new google.maps.Marker({
+						map: map, title: locations[i].name, position: latlngset
+					});
+					markers.push(punkt);
+					let content = locations[i].content;
+					let infowindow = new google.maps.InfoWindow()
+					google.maps.event.addListener(punkt,'click', (function(punkt,content,infowindow){
+						return function() {
+							if(before_infoWindows){
+								before_infoWindows.close();
+							}
+							infowindow.setContent(content);
+							infowindow.open(map,punkt);
+							before_infoWindows = infowindow;
+						};
+					})(punkt,content,infowindow));
+					bounds.extend(punkt.position);
+				}
+				google.maps.event.addListener(map, 'zoom_changed', function() {
+					zoomChangeBoundsListener =
+						google.maps.event.addListener(map, 'bounds_changed', function(event) {
+							if (this.getZoom() > 16 && this.initialZoom == true) {
+								this.setZoom(16);
+								this.initialZoom = false;
+							}
+						google.maps.event.removeListener(zoomChangeBoundsListener);
+					});
+				});
+				map.initialZoom = true;
+				map.fitBounds(bounds);
+				let markerCluster = new MarkerClusterer(map, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+			}
+		</script>
+		<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key={{ settings.google_maps_api }}&v=3.exp&libraries=places&callback=initGoogleMap" async defer></script>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="page_box" id="offers_page">
+	<div class="container">
+		<h1>{% if settings.h1 %}{{ settings.h1 }}{% else %}{{ 'Offers'|lang }}{% endif %}</h1>
+	</div>
+	{% if settings.google_maps and offers_show_map %}
+		<div id="google_maps"></div>
+	{% endif %}
+	{% if settings.ads_1 %}<div class="ads">{{ settings.ads_1|raw }}</div>{% endif %}
+	<br>
+	<div class="container">	
+		<div class="row">
+			{% if breadcrumbs %}
+				<div class="col-12">
+					<nav class="breadcrumbs" itemscope itemtype="http://schema.org/BreadcrumbList">
+						<a href="{{ settings.base_url }}" title="{{ 'Main Page'|lang }}" class="main-color-22" itemprop="itemListElement" >{{ 'Main Page'|lang }}</a>
+						{% for item in breadcrumbs %}
+							> <a href="{{ item.path }}" title="{{ item.name }}" class="main-color-23" itemprop="itemListElement" >{{ item.name }}</a>
+						{% endfor %}
+					</nav>
+				</div>
+			{% endif %}
+			<div class="col-lg-3">
+				{% if settings.ads_side_1 %}<div class="ads">{{ settings.ads_side_1|raw }}</div>{% endif %}
+
+				<div class="d-block d-lg-none text-center">
+					<button data-toggle="collapse" data-target="#form_search_offers" class="btn btn-outline-primary">{{ 'Show / hide search box'|lang }}</button><br><br>
+				</div>
+				<form class="form-search collapse show" method="get" id="form_search_offers">
+					<input type="hidden" name="search">
+					{% if get.category>0 %}
+						<input type="hidden" name="category" value="{{ get.category }}">
+					{% endif %}
+					{% if categories %}
+						<div class="form-group">
+							<nav>
+								<h4>{{ 'Categories'|lang }}
+									<a href="{{ path('offers') }}" title="{{ 'Main Page'|lang }}" class="float-right"><i class="fas fa-home"></i></a>
+									{% if overCategory %}
+										<a href="{{ overCategory.search_path }}" title="{{ overCategory.name }}" class="float-right"><i class="fas fa-arrow-up"></i></a>
+									{% endif %}
+								</h4>
+								<ul class="list-unstyled">
+								{% for cat in categories %}
+									<li {% if get.category==cat.id %}class="active"{% endif %}><a href="{{ cat.search_path }}" title="{{ 'Category'|lang }}: {{ cat.name }}">{% if cat.thumb %}<img src="{{ cat.thumb }}" alt="{{ cat.name }}"> {% endif %}{{ cat.name }}{% if settings.show_number_offers_in_categories and not get.search is defined and not get.state and not get.type %} <span class="badge badge-secondary">{{ cat.number_offers }}</span>{% endif %}</a></li>
+								{% endfor %}
+								</ul>
+							</nav>
+						</div>
+					{% endif %}
+					{% if get.username %}
+						<div class="form-group">
+							<label for="username" class="control-label">{{ 'Username'|lang }}: </label>
+							<select name="username" id="username" class="form-control">
+								<option value="">{{ 'All users'|lang }}</option>
+								<option value="{{ get.username }}" selected>{{ get.username }}</option>
+							</select>
+						</div>
+					{% endif %}
+					{% if settings.search_box_keywords %}
+						<div class="form-group">
+							<label for="keywords" class="control-label">{{ 'Keywords'|lang }}: </label>
+							<input class="form-control" type="text" name="keywords" id="keywords" placeholder="{{ 'Enter your keywords...'|lang }}" title="{{ 'Enter your keywords...'|lang }}" value="{{ get.keywords }}">
+							<div class="checkbox">
+								<label><input type="checkbox" name="exact_phrase" {% if get.exact_phrase %}checked{% endif %}> {{ 'Exact phrase'|lang }}</label>
+							</div>
+						</div>
+					{% endif %}
+					{% if types %}
+						<div class="form-group">
+							<label for="type" class="control-label">{{ 'Offer type'|lang }}:</label>
+							<div class="radio">
+								<label><input type="radio" name="type" value="" {% if not get.type %}checked{% endif %}> {{ 'All'|lang }}</label>
+							</div>
+							{% for type in types %}
+								<div class="radio">
+									<label><input type="radio" name="type" value="{{ type.slug }}" {% if get.type==type.slug %}checked{% endif %}> {{ type.name }}</label>
+								</div>
+							{% endfor %}
+						</div>
+					{% endif %}
+					{% if states %}
+						<div class="form-group">
+							<label for="state" class="control-label">{{ 'State'|lang }}:</label>
+							<select class="form-control select_state" name="state" id="state" title="{{ 'Select the appropriate state'|lang }}">
+								<option value="">{{ 'All'|lang }}</option>
+								<option disabled>──────────</option>
+								{% for state in states %}
+									<option value="{{ state.slug }}" {% if get.state==state.slug %}selected{% endif %}>{{ state.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						{% for key,state in states %}
+							{% if state.states %}
+								<div class="form-group substates substate_{{ state.slug }}" {% if get.state!=state.slug %}style="display: none"{% endif %}>
+									<select class="form-control" name="state2" title="{{ 'Select the appropriate state'|lang }}" {% if get.state!=state.slug %}disabled{% endif %}>
+										<option value="">{{ '-- select --'|lang }}</option>
+										{% for key2,state2 in state.states %}
+											<option value="{{ state2.slug }}" {% if get.state2==state2.slug %}selected{% endif %}>{{ state2.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							{% endif %}
+						{% endfor %}
+					{% endif %}
+					{% if settings.search_box_address %}
+						<div class="form-group">
+							<button type="submit" class="form-control btn btn-1 text-uppercase"><i class="fas fa-search"></i> {{ 'Search'|lang }}</button>
+						</div>
+						<div class="form-group">
+							<label for="search_box_address">{{ 'Address'|lang }}:</label>
+							<input type="text" name="address" class="form-control" placeholder="{{ '1600 Pennsylvania Avenue NW, Washington, D.C. 20500'|lang }}" title="{{ 'Enter the address'|lang }}" value="{{ get.address }}" id="search_box_address">
+						</div>
+						{% if settings.search_box_distance and settings.google_maps_api %}
+							<div class="form-group">
+								<div class="form-inline text-right">
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text">{{ 'Distance'|lang }}</span>
+										</div>
+										<input type="number" name="distance" class="form-control text-right" placeholder="20" title="{{ 'Enter the distance from the searched address'|lang }}" value="{% if get.distance>=0 %}{{ get.distance }}{% else %}10{% endif %}" min="0" step="1">
+										<div class="input-group-append">
+											<span class="input-group-text">{{ 'km'|lang }}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						{% endif %}
+					{% endif %}
+					{% if search_show_price %}
+						<div class="form-group">
+							<label for="search_price_from" class="control-label">{{ 'Price'|lang }}: </label>
+							<div class="input-group">
+								<input class="form-control text-right" type="number" name="price_from" id="search_price_from" placeholder="{{ 'Min...'|lang }}" title="{{ 'Enter the min value'|lang }}" value="{{ get.price_from }}" min="0" step="0.01">
+								<div class="input-group-append input-group-prepend">
+									<span class="input-group-text"> - </span>
+								</div>
+								<input class="form-control text-right" type="number" name="price_to" id="search_price_to" placeholder="{{ 'Max...'|lang }}" title="{{ 'Enter the max value'|lang }}" value="{{ get.price_to }}" min="0" step="0.01">
+							</div>
+						</div>
+					{% endif %}
+					{% if options %}
+						{% for option in options %}
+							<div class="form-group">
+								<label for="options[{{ option.name }}]" class="control-label">{{ option.name }}: </label>
+								{% if option.kind=='text' %}
+									<input class="form-control" type="text" name="options[{{ option.id }}]" value="{{ get.options[option.id] }}">
+								{% elseif option.kind=='number' %}
+									<div class="input-group">
+										<input class="form-control text-right" type="number" name="options[{{ option.id }}][from]" placeholder="{{ 'Min...'|lang }}" title="{{ 'Enter the min value'|lang }}" value="{{ get.options[option.id].from }}">
+										<div class="input-group-append input-group-prepend">
+											<span class="input-group-text"> - </span>
+										</div>
+										<input class="form-control text-right" type="number" name="options[{{ option.id }}][to]" placeholder="{{ 'Max...'|lang }}" title="{{ 'Enter the max value'|lang }}" value="{{ get.options[option.id].to }}">
+									</div>
+								{% elseif (option.kind=='select' or option.kind=='checkbox') and option.choices %}
+									<div class="group_checkbox">
+										{% for choice in option.choices %}
+											<div class="checkbox">
+												<label><input type="checkbox" name="options[{{ option.id }}][]" value="{{ choice }}" {% if choice in get.options[option.id] %}checked{% endif %}> {{ choice }}</label>
+											</div>
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+						{% endfor %}
+					{% endif %}
+					<div class="form-group">
+						<button type="reset" class="reset_form form-control btn btn-danger text-uppercase"><i class="fas fa-eraser"></i> {{ 'Clear'|lang }}</button>
+					</div>
+					<div class="form-group">
+						<button type="submit" class="form-control btn btn-1 text-uppercase"><i class="fas fa-search"></i> {{ 'Search'|lang }}</button>
+					</div>
+				</form>
+
+				{% if settings.ads_side_2 %}<div class="ads">{{ settings.ads_side_2|raw }}</div>{% endif %}
+			</div>
+			<div class="col-lg-9">
+				{% if settings.content %}{{ settings.content|raw }}{% endif %}
+				{% include 'offers.tpl' %}
+			<!--<div class="addL" title="Dodaj reklamę Lokalną.">Dodaj reklamę lokalną."Już wktótce!"</div></br>-->
+				{% include 'ads.tpl' %}
+			</div>
+		</div>
+	</div>
+</div>
+<div>1</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+{% endblock %}

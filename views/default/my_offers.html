@@ -1,0 +1,56 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+
+<div class="page_box">
+	<div class="container">
+		<h1>{{ 'My offers'|lang }}</h1>
+		<p class="text-left"><i class="fas fa-info-circle" style="color: #85be51;"></i> Portal utrzymuje się dzięki Twojemu promowaniu ogłoszeń, promuj ogłoszenie.</p>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3">
+				<br><br>
+				{% if settings.ads_side_1 %}<div class="ads">{{ settings.ads_side_1|raw }}</div>{% endif %}
+				<form class="form-horizontal form-search" method="get" id="form_search_offers">
+					<input type="hidden" name="search">
+					<div class="form-group">
+						<label for="active">{{ 'Active'|lang }}:</label>
+						<select name="active" title="{{ 'Search by active offers'|lang }}" class="form-control">
+							<option value="">{{ 'All'|lang }}</option>
+							<option value="yes" {% if get.active=='yes' %}selected{% endif %}>{{ 'Yes'|lang }}</option>
+							<option value="no" {% if get.active=='no' %}selected{% endif %}>{{ 'No'|lang }}</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="keywords" class="control-label">{{ 'Keywords'|lang }}: </label>
+						<input class="form-control" type="text" name="keywords" id="keywords" placeholder="{{ 'Enter your keywords...'|lang }}" title="{{ 'Enter your keywords...'|lang }}" value="{{ get.keywords }}">
+						<div class="checkbox">
+							<label><input type="checkbox" name="exact_phrase" {% if get.exact_phrase %}checked{% endif %}> {{ 'Exact phrase'|lang }}</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<button class="form-control btn-1 text-uppercase" type="submit"><i class="fas fa-search"></i> {{ 'Search'|lang }}</button>
+					</div>
+					<div class="promuj_ogloszenie" title="Promuj ogłoszenie" alt="promuj_ogloszenie">
+						<div class="PromujO">Promuj ogłoszenie za:{{ settings.promote_cost|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }}
+							<div class="col-md-6"><!-- payment-->
+								<img src="{{ settings.base_url }}/views/{{ settings.template }}/images/pay/dotpay_logo.png" class="rounded float-left" alt="Dotpay" title="Zapłać za pomocą dotpay">
+								<img src="{{ settings.base_url }}/views/{{ settings.template }}/images/pay/paypal_logo.png" class="rounded float-left" alt="PayPal" title="Zapłać za pomocą PayPal">
+							<br/>
+							</div>
+						</div>
+						<div class="PromujP"title="Promuj ogłoszenie" alt="promuj_ogloszenie"></div>
+					</div><!--Test promowania ogłoszenia-->
+				</form>
+				{% if settings.ads_side_2 %}<div class="ads">{{ settings.ads_side_2|raw }}</div>{% endif %}
+			</div>
+			<div class="col-md-9">
+				{% include 'offers.tpl' %}
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

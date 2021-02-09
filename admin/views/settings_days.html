@@ -1,0 +1,156 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}	
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="{{ 'Add display time'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Add display time'|lang }}</h4>
+			</div>
+			<form method="post" class="form">
+				<input type="hidden" name="action" value="add_day">
+				<input type="hidden" name="token" value="{{ generateToken('admin_add_day') }}">
+				<div class="modal-body">
+					<div class="form-group form-inline">
+						<label for="length">{{ 'Length'|lang }}</label>
+						<input type="number" name="length" required min="1" title="{{ 'Number of days'|lang }}" class="form-control">
+						<label>{{ 'days'|lang }}</label>
+					</div>
+					<div class="form-group form-inline">
+						<label for="cost">{{ 'Charge'|lang }}</label>
+						<div class="input-group">
+							<input type="number" name="cost" min="0" step="0.01" class="form-control">
+							<div class="input-group-addon">{{ settings.currency }}</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-asterisk"></span> {{ 'Settings: length of offers'|lang }}</h1>
+	<p>{{ 'Here you can edit the settings of the service'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#add">{{ 'Add display time'|lang }}</button>
+<br><br>
+{% if offers_days %}
+	<table class="table-striped table-bordered table-condensed">
+		<tr>
+			<th class="text-center">{{ 'Length'|lang }}</th>
+			<th class="text-center">{{ 'Charge'|lang }}</th>
+			<th class="text-center">{{ 'Edit'|lang }}</th>
+			<th class="text-center">{{ 'Remove'|lang }}</th>
+		</tr>
+			
+		{% for item in offers_days %}
+			<tr>
+				<td class="text-center">{{ item.length }}</td>
+				<td class="text-center">{{ item.cost|showCurrency }}</td>
+				<td class="text-center"><a href="#" title="{{ 'Edit'|lang }}" class="glyphicon glyphicon-edit" data-toggle="modal" data-target="#edit_{{ item.id }}"></a></td>
+				<td class="text-center"><a href="#" title="{{ 'Remove display time'|lang }}" class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#remove_{{ item.id }}"></a></td>
+			</tr>
+
+			<div class="modal fade" id="edit_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Edit display time'|lang }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Edit display time'|lang }}</h4>
+						</div>
+						<form method="post" class="form">
+							<input type="hidden" name="action" value="edit_day">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_edit_day') }}">
+							<div class="modal-body">
+								<div class="form-group form-inline">
+									<label for="length">{{ 'Length'|lang }}</label>
+									<input type="number" name="length" required min="1" title="{{ 'Number of days'|lang }}" class="form-control" value="{{ item.length }}">
+									<label>{{ 'days'|lang }}</label>
+								</div>
+								<div class="form-group form-inline">
+									<label for="cost">{{ 'Charge'|lang }}</label>
+									<div class="input-group">
+										<input type="number" name="cost" min="0" step="0.01" class="form-control" value="{{ item.cost }}">
+										<div class="input-group-addon">{{ settings.currency }}</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="remove_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Remove display time'|lang }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Remove display time'|lang }}</h4>
+						</div>
+						<form method="post">
+							<input type="hidden" name="action" value="remove_day">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_remove_day') }}">
+							<div class="modal-body">
+								<p>{{ 'Are you sure you want to remove display time'|lang }}: "{{ item.length }}"?</p>
+							</div>
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		{% endfor %}		
+	</table>
+{% endif %}
+<br><br>
+<form method="post" class="form" role="form">
+	<input type="hidden" name="action" value="save_settings_days">
+	<input type="hidden" name="token" value="{{ generateToken('admin_save_settings_days') }}">
+	<div class="form-group">
+		<label><input type="checkbox" name="allow_refresh_offer" title="{{ 'Allow refresh offers'|lang }}" {% if settings.allow_refresh_offer %}checked{% endif %}> {{ 'Allow refresh offers'|lang }}</label><br>
+	</div>
+	<div class="form-group form-inline">
+		<label>{{ 'Refresh extends offer'|lang }}:</label>
+		<input type="number" step="1" min="1" name="days_refresh" title="{{ 'Number of days'|lang }}" value="{{ settings.days_refresh }}" class="form-control" required>
+		<label>{{ 'days'|lang }}</label>
+	</div>
+	<div class="form-group form-inline">
+		<label>{{ 'Refresh is available'|lang }}:</label>
+		<input type="number" step="1" min="0" name="days_before_refresh" title="{{ 'Number of days'|lang }}" value="{{ settings.days_before_refresh }}" class="form-control" required>
+		<label>{{ 'days before the end of offer'|lang }}</label>
+	</div>
+	<div class="form-group form-inline">
+		<p>({{ 'The following setting is only active if not determined the times ads'|lang }})</p>
+		<label>{{ 'Default time'|lang }}:</label>
+		<input type="number" step="1" min="1" name="days_default" title="{{ 'Number of days'|lang }}" value="{{ settings.days_default }}" class="form-control" required>
+		<label>{{ 'days'|lang }}</label>
+	</div>
+	<div class="form-group form-inline">
+		<label>{{ 'Automatically remove inactive offer after'|lang }}:</label>
+		<input type="number" step="1" min="1" name="days_to_remove" title="{{ 'Number of days'|lang }}" value="{{ settings.days_to_remove }}" class="form-control" required>
+		<label>{{ 'days'|lang }}</label>
+	</div>
+	<div class="form-group">
+		<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+	</div>
+</form>
+{% endblock %}
+

@@ -1,0 +1,130 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="{{ 'Add state'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Add state'|lang }}</h4>
+			</div>
+			<form method="post">
+				<input type="hidden" name="action" value="add_state">
+				<input type="hidden" name="token" value="{{ generateToken('admin_add_state') }}">
+				<div class="modal-body">
+					<label>{{ 'The name'|lang }}</label>
+					<input type="text" name="name" required maxlength="64" placeholder="{{ 'The name'|lang }}" title="{{ 'The name'|lang }}" class="form-control">
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-tree-deciduous"></span> {% if state %}{{ 'States in'|lang }} {{ state.name }}{% else %}{{ 'States'|lang }}{% endif %}</h1>
+	<p>{{ 'Here you can edit the states on the site'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+	
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add">{{ 'Add state'|lang }}</button>
+{% if state %}<br><br><a href="?controller=states" title="{{ 'Return to the list of states'|lang }}">{{ 'Return to the list of states'|lang }}</a>{% endif %}
+<br><br>
+ {% if states %}
+	<table class="table parent_select_checkbox table-striped table-bordered table-condensed">
+		<tr>
+			<th></th>
+			<th>{{ 'The name'|lang }}</th>
+			<th class="text-center" style="width:55px">{{ 'Position'|lang }}</th>
+			{% if not state %}<th class="text-center">{{ 'Edit substates'|lang }}</th>{% endif %}
+			<th class="text-center">{{ 'Edit'|lang }}</th>
+			<th class="text-center">{{ 'Remove'|lang }}</th>
+		</tr>
+			
+		{% for item in states %}
+			<tr>
+				<td>{{ loop.index }}</td>
+				<td>{{ item.name }}</td>
+				<td class="text-center">
+					<a href="#" title="{{ 'Position up'|lang }}" class="glyphicon glyphicon-arrow-up ajax {% if loop.first %}inactive{% endif %}" data-action="position_states" data-id="{{ item.id }}" data-position="{{ item.position }}" data-plusminus="+" data-state_id="{% if state %}{{ state.id }}{% else %}0{% endif %}" data-token="{{ generateToken('admin_position_states') }}"></a>
+					<a href="#" title="{{ 'Position down'|lang }}" class="glyphicon glyphicon-arrow-down ajax {% if loop.last %}inactive{% endif %}" data-action="position_states" data-id="{{ item.id }}" data-position="{{ item.position }}" data-plusminus="-" data-state_id="{% if state %}{{ state.id }}{% else %}0{% endif %}" data-token="{{ generateToken('admin_position_states') }}"></a>
+				</td>
+				{% if not state %}<td class="text-center"><a href="?controller=states&state_id={{ item.id }}" title="{{ 'Edit substates'|lang }}" class="glyphicon glyphicon-edit"></a></td>{% endif %}
+				<td class="text-center"><a href="#" title="{{ 'Edit'|lang }}" class="glyphicon glyphicon-edit" data-toggle="modal" data-target="#edit_{{ item.id }}"></a></td>
+				<td class="text-center"><a href="#" title="{{ 'Remove'|lang }}" class="glyphicon glyphicon-remove text-danger" data-toggle="modal" data-target="#remove_{{ item.id }}"></a></td>			
+			</tr>
+			
+			<div class="modal fade" id="edit_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Edit'|lang }}: {{ item.name }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Edit'|lang }}: {{ item.name }}</h4>
+						</div>
+						<form method="post">
+							<input type="hidden" name="action" value="edit_state">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_edit_state') }}">
+							<div class="modal-body">
+								<label>{{ 'The name'|lang }}</label>
+								<input type="text" name="name" required maxlength="64" placeholder="{{ 'The name'|lang }}" title="{{ 'The name'|lang }}" value="{{ item.name }}" class="form-control">
+							</div><!--Test dodania seo-->
+							<div class="form-group">
+									<label for="h1">{{ 'Header h1'|lang }}</label>
+									<input type="text" name="h1" title="{{ 'Header h1'|lang }}" placeholder="{{ 'Header h1'|lang }}" maxlength="512" class="form-control">
+								</div>
+								<div class="form-group">
+									<label for="title">{{ 'Title SEO'|lang }}</label>
+									<input type="text" name="title" title="{{ 'Title SEO'|lang }}" placeholder="{{ 'Title SEO'|lang }}" maxlength="512" class="form-control">
+								</div>
+								<div class="form-group">
+									<label for="keywords">{{ 'Keywords SEO'|lang }}</label>
+									<input type="text" name="keywords" title="{{ 'Keywords SEO'|lang }}" placeholder="{{ 'Keywords SEO'|lang }}" maxlength="512" class="form-control">
+								</div>
+								<div class="form-group">
+									<label for="description">{{ 'Description SEO'|lang }}</label>
+									<textarea name="description" title="{{ 'Description SEO'|lang }}" placeholder="{{ 'Description SEO'|lang }}" maxlength="512" class="form-control"></textarea>
+								</div><!--Koniec testu dodania seo-->
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="remove_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Remove state'|lang }}: {{ item.name }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Remove state'|lang }}</h4>
+						</div>
+						<form method="post">
+							<input type="hidden" name="action" value="remove_state">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_remove_state') }}">
+							<div class="modal-body">
+								<p>{{ 'Are you sure you want to remove a state'|lang }}: "{{ item.name }}"?</p>
+							</div>
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		{% endfor %}		
+	</table>
+	<p><a href="#" title="{{ 'Arrange alphabetically'|lang }}" class="ajax_confirm" data-action="arrange_staties_alphabetically" data-title="{{ 'Are you sure you want to arrange staties alphabetically on this page?'|lang }}" data-state_id="{% if state %}{{ state.id }}{% else %}0{% endif %}" data-token="{{ generateToken('admin_arrange_staties_alphabetically') }}">{{ 'Arrange alphabetically'|lang }}</a>
+{% else %}
+	<h4 class="text-danger">{{ 'Nothing found'|lang }}</h4>
+{% endif %}
+{% endblock %}

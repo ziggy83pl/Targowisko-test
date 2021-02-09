@@ -1,0 +1,44 @@
+
+{% extends "main.tpl" %}  
+
+{% block content %}
+
+<div class="page_box background_grey">
+	<div class="container">
+		<h1>{{ 'Clipboard'|lang }} <i class="fas fa-archive"></i></h1>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-3">
+				<br><br>
+				{% if settings.ads_side_1 %}<div class="ads">{{ settings.ads_side_1|raw }}</div>{% endif %}
+				<form class="form-horizontal form-search" method="get" id="form_search_offers">
+					<input type="hidden" name="search">
+					<div class="form-group">
+						<label for="keywords" class="control-label">{{ 'Keywords'|lang }}: </label>
+						<input class="form-control" type="text" name="keywords" id="keywords" placeholder="{{ 'Enter your keywords...'|lang }}" title="{{ 'Enter your keywords...'|lang }}" value="{{ get.keywords }}">
+						<div class="checkbox">
+							<label><input type="checkbox" name="exact_phrase" {% if get.exact_phrase %}checked{% endif %}> {{ 'Exact phrase'|lang }}</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<button class="form-control btn-1 text-uppercase" type="submit"><i class="fas fa-search"></i> {{ 'Search'|lang }}</button>
+					</div>
+					<div class="promuj_schowek" title="Promuj ogłoszenie" alt="promuj_ogloszenie">
+							<div class="PromujO">Promuj swoje ogłoszenie za:{{ settings.promote_cost|showCurrency }} / {{ settings.promote_days }} {{ 'days'|lang }} i wyróżnij się na tle innych!</div>
+							<div class="PromujT"title="Promuj ogłoszenie" alt="promuj_ogloszenie"></div>
+						</div>
+				</form>
+				{% if settings.ads_side_2 %}<div class="ads">{{ settings.ads_side_2|raw }}</div>{% endif %}
+			</div>
+			<div class="col-md-9">
+				{% include 'offers.tpl' %}</br>
+				{% include 'ads.tpl' %}</br>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+{% endblock %}
+

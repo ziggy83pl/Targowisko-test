@@ -1,0 +1,167 @@
+
+{% extends "main.tpl" %}
+
+{% block javascript %}
+	{{ parent() }}
+	<script src="js/ckeditor/ckeditor.js"></script>
+	<script>
+		var roxyFileman = 'js/ckeditor/fileman/index.html';
+		$(function(){
+			CKEDITOR.replace( 'description',{height: '200px'});
+		});
+	</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="page_box background_grey">
+	<div class="container background_white">
+		<div class="text-center">
+			<br><h2>{{ 'Settings'|lang }} <i class="fa fa-cog fa-spin fa-3x fa-fw" style="font-size:.8em; color:#28a745;"></i></h2>
+			<h3>{{ 'Here you can edit your account data'|lang }}</h3>
+			<br>
+			<h4>{{ 'Statistics'|lang }} <i class="far fa-chart-bar"></i></h4>
+		</div>
+		<div class="Statistics">
+		<table class="table table-striped table-bordered" style="width: auto !important; margin: auto;">
+			<tr><td><i class="far fa-user-circle"></i>{{ 'Username'|lang }}:</td><td><a href="{{ path('profile',0,user.username) }}" title="{{ user.username }}">{{ user.username }}</a></td></tr>
+			<tr><td><i class="far fa-envelope"></i>{{ 'E-mail address'|lang }}:</td><td>{{ user.email }}</td></tr>
+			<tr><td><i class="fas fa-sort-numeric-up"></i>{{ 'Number of offers'|lang }}:</td><td>{{ user.number_offers }}</td></tr>
+			<tr><td><i class="fas fa-clock"></i>{{ 'Date of registration'|lang }}:</td><td>{{ user.date|date("d-m-Y") }}</td></tr>
+			<tr><td><i class="fas fa-list-ol"></i>{{ 'Number of logins'|lang }}:</td><td>{{ user.number_login }}</td></tr>
+			{% if user.last_login %}
+				<tr><td><i class="fas fa-sign-in-alt"></i>{{ 'Last login'|lang }}:</td><td>{{ user.last_login|date("d-m-Y") }} / {{ user.last_login|date("H:i") }}</td></tr>
+			{% endif %}
+			{% if user.last_reset_password %}
+				<tr><td>{{ 'Last reset password'|lang }}:</td><td>{{ user.last_reset_password|date("d-m-Y") }} / {{ user.last_reset_password|date("H:i") }}</td></tr>
+			{% endif %}
+		</table>
+		</div>
+		<br><br>
+		<div class="text-center">
+			<h4>{{ 'Avatar'|lang }} <i class="fas fa-user-astronaut" style="color: #007bff;"></i></h4>
+			<form class="form-horizontal" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="action" value="save_avatar">
+				<input type="hidden" name="token" value="{{ generateToken('save_avatar') }}">
+				{% if user.avatar %}
+					<img src="upload/avatars/{{ user.avatar }}" alt="{{ 'Avatar'|lang }}" onerror="this.src='{{ settings.base_url }}/views/{{ settings.template }}/images/no_image.png'"><br><br>
+					<p><a href="#" data-toggle="modal" data-target="#remove_avatar" class="text-danger"><i class="fas fa-trash-alt"></i> {{ 'Remove avatar'|lang }}</a></p>
+				{% endif %}
+				<input class="form-control-file btn avatar" type="file" name="avatar" accept="image/jpeg, image/png" required style="width: auto"><br><br><br>
+				<input type="submit" class="btn btn-secondary text-uppercase" value="{{ 'Save'|lang }}">
+			</form><br><br>
+			<h4>{{ 'Description'|lang }} <i class="fas fa-pencil-alt" style="color:#073c63;"></i></h4>
+			<h5>{{ 'The description will be displayed on the profile page'|lang }}</h5>
+			<form class="form-horizontal" method="post">
+				<input type="hidden" name="action" value="save_description">
+				<input type="hidden" name="token" value="{{ generateToken('save_description') }}">
+				<div class="form-group">
+					<textarea id="description" name="description" class="form-control" style="height: 150px">{{ user.description|raw }}</textarea>
+				</div>
+				<input type="submit" class="btn btn-secondary text-uppercase" value="{{ 'Save'|lang }}">
+			</form><br><br>
+			<h4>{{ 'Personal data'|lang }} <i class="far fa-user" style="color: orange;"></i></h4>
+			<h5>{{ 'The following data will automatically supplement the offer posting form'|lang }}</h5>
+		</div>
+		<form method="post">
+			<input type="hidden" name="action" value="save_user_data">
+			<input type="hidden" name="token" value="{{ generateToken('save_user_data') }}">
+			<div class="form-group row">
+				<label for="phone" class="col-sm-2 col-form-label"><i class="fas fa-phone"></i> {{ 'Phone'|lang }}:</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="phone" placeholder="{{ '+12 345 678 901'|lang }}" id="phone" maxlength="32" value="{{ user.phone }}" title="{{ 'Enter the phone number'|lang }}">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="add_address" class="col-sm-2 col-form-label"><i class="fas fa-map-marker-alt"></i> {{ 'Address'|lang }}:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control getCoordinates" name="address" placeholder="{{ '1600 Pennsylvania Avenue NW, Washington, D.C. 20500'|lang }}" id="add_address" maxlength="512" value="{{ user.address }}" title="{{ 'Enter the address'|lang }}">
+				</div>
+			</div>
+			<div class="form-group row">
+				{% if states %}
+					<label for="state_id" class="col-sm-2 col-form-label"><i class="fas fa-map"></i> {{ 'State'|lang }}:</label>
+					<div class="col-sm-4">
+						<select class="form-control select_state" name="state_id" id="state_id" title="{{ 'Select the appropriate state'|lang }}">
+							<option value="">{{ '-- select --'|lang }}</option>
+							{% for key,state in states %}
+								<option value="{{ key }}" {% if user.state_id==key %}selected{% endif %}>{{ state.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					{% for key,state in states %}
+						{% if state.states %}
+							<div class="col-sm-4 substates substate_{{ state.id }}" {% if user.state_id!=key %}style="display:none"{% endif %}>
+								<select class="form-control" name="state2_id" title="{{ 'Select the appropriate state'|lang }}" {% if user.state_id!=key %}disabled{% endif %}>
+									<option value="">{{ '-- select --'|lang }}</option>
+									{% for key2,state2 in state.states %}
+										<option value="{{ state2.id }}" {% if user.state2_id==key2 %}selected{% endif %}>{{ state2.name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div class="text-center">
+				<input type="submit" class="btn btn-secondary text-uppercase" value="{{ 'Save'|lang }}">
+			</div>
+		</form><br><br>
+		<div class="text-center">
+			<h4>{{ 'Password change'|lang }} <i class="fas fa-user-lock" style="color: #17a2b8;"></i></h4>
+		</div>
+		{% include 'alert.tpl' %}
+		<form class="form-horizontal" method="post">
+			<input type="hidden" name="action" value="change_password">
+			<input type="hidden" name="token" value="{{ generateToken('change_password') }}">
+			<div class="form-group row">
+				<label for="old_password" class="col-sm-2 offset-sm-3 col-form-label">{{ 'Old password'|lang }}:</label>
+				<div class="col-sm-4">
+					<input type="password" class="form-control" name="old_password" placeholder="****" id="old_password" maxlength="32" required title="{{ 'Old password'|lang }}">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="new_password" class="col-sm-2 offset-sm-3 col-form-label">{{ 'New password'|lang }}:</label>
+				<div class="col-sm-4">
+					<input type="password" class="form-control" name="new_password" placeholder="****" id="new_password" maxlength="32" required title="{{ 'New password'|lang }}">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="repeat_new_password" class="col-sm-2 offset-sm-3 col-form-label">{{ 'Repeat new password'|lang }}</label>
+				<div class="col-sm-4">
+					<input type="password" class="form-control" name="repeat_new_password" placeholder="****" id="repeat_new_password" maxlength="32" required title="{{ 'Repeat new password'|lang }}">
+				</div>
+			</div>
+			<div class="text-center">
+				<input type="submit" class="btn btn-secondary text-uppercase" value="{{ 'Save'|lang }}">
+			</div>
+		</form>
+		<br><br>
+	</div>
+</div>
+
+{% if user.avatar %}
+	<div class="modal fade" id="remove_avatar">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">{{ 'Remove avatar'|lang }}</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<form method="post" class="form">
+					<input type="hidden" name="action" value="remove_avatar">
+					<input type="hidden" name="token" value="{{ generateToken('remove_avatar') }}">
+					<div class="modal-body">
+						<p>{{ 'Are you sure you want to delete the avatar?'|lang }}</p>
+					</div>
+					<div class="modal-footer">
+						<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+						<input type="submit" class="btn btn-danger" value="{{ 'Remove avatar'|lang }}">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endif %}
+
+{% endblock %}

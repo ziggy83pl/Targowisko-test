@@ -1,0 +1,89 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-asterisk"></span> {{ 'Setting social networks'|lang }}</h1>
+	<p>{{ 'Here you can edit the settings of the service'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<form method="post" class="form-horizontal" role="form">
+	<input type="hidden" name="action" value="save_settings_social_media">
+	<input type="hidden" name="token" value="{{ generateToken('admin_save_settings_social_media') }}">
+	<div class="form-group">
+		<div class="col-sm-10 col-sm-offset-2">
+			<label><input type="checkbox" name="social_facebook" title="{{ 'Show icon sharing from Facebook'|lang }}" {% if settings.social_facebook %}checked{% endif %}> {{ 'Show icon sharing from Facebook'|lang }}</label><br>
+			<label><input type="checkbox" name="social_google_plus" title="{{ 'Show icon sharing from Google Plus'|lang }}" {% if settings.social_google_plus %}checked{% endif %}> {{ 'Show icon sharing from Google Plus'|lang }}</label><br>
+			<label><input type="checkbox" name="social_pinterest" title="{{ 'Show icon sharing from Pinterest'|lang }}" {% if settings.social_pinterest %}checked{% endif %}> {{ 'Show icon sharing from Pinterest'|lang }}</label><br>
+			<label><input type="checkbox" name="social_twitter" title="{{ 'Show icon sharing from Twitter'|lang }}" {% if settings.social_twitter %}checked{% endif %}> {{ 'Show icon sharing from Twitter'|lang }}</label><br>
+			<label><input type="checkbox" name="social_wykop" title="{{ 'Show icon sharing from Wykop.pl'|lang }}" {% if settings.social_wykop %}checked{% endif %}> {{ 'Show icon sharing from Wykop.pl'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<label for="url_facebook" class="col-sm-3 control-label">{{ 'Facebook URL'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="url_facebook" title="{{ 'Facebook URL'|lang }}" value="{{ settings.url_facebook }}" class="target_facebook_side_panel form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="facebook_side_panel" title="{{ 'Show side panel with Facebook'|lang }}" {% if settings.facebook_side_panel %}checked{% endif %} class="set_required" data-target="target_facebook_side_panel"> {{ 'Show side panel with Facebook'|lang }}</label><br>
+			<label><input type="checkbox" name="allow_comments_fb_profile" title="{{ 'Allow to comment on the user\'s profile by Facebook Account'|lang }}" {% if settings.allow_comments_fb_profile %}checked{% endif %}> {{ 'Allow to comment on the user\'s profile by Facebook Account'|lang }}</label>
+			<label><input type="checkbox" name="allow_comments_fb_article" title="{{ 'Allow to comment on the articles by Facebook Account'|lang }}" {% if settings.allow_comments_fb_article %}checked{% endif %}> {{ 'Allow to comment on the articles by Facebook Account'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<label for="facebook_lang" class="col-sm-3 control-label">{{ 'Facebook - identification of language'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="facebook_lang" title="{{ 'Facebook - identification of language'|lang }}" value="{{ settings.facebook_lang }}" required placeholder="pl_PL" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="facebook_login" title="{{ 'Allow login through Facebook'|lang }}" {% if settings.facebook_login %}checked{% endif %} class="set_required" data-target="target_facebook_login"> {{ 'Allow login through Facebook'|lang }}</label>
+			<p><a href="https://developers.facebook.com/" target="_blank" title="Facebook Developers">https://developers.facebook.com/</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="facebook_api" class="col-sm-3 control-label">{{ 'Facebook API'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="facebook_api" title="{{ 'Facebook API'|lang }}" value="{{ settings.facebook_api }}" class="target_facebook_login form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="facebook_secret" class="col-sm-3 control-label">{{ 'Facebook Secret'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="facebook_secret" title="{{ 'Facebook Secret'|lang }}" value="{% if _ADMIN_TEST_MODE_ %}test{% else %}{{ settings.facebook_secret }}{% endif %}" class="target_facebook_login form-control">
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="google_login" title="{{ 'Allow login through Google'|lang }}" {% if settings.google_login %}checked{% endif %} class="set_required" data-target="target_google_login"> {{ 'Allow login through Google'|lang }}</label>
+			<p><a href="https://console.developers.google.com/" target="_blank" title="Google API Console">https://console.developers.google.com/</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_id" class="col-sm-3 control-label">{{ 'Google ID'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="google_id" title="{{ 'Google ID'|lang }}" value="{{ settings.google_id }}" class="target_google_login form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="google_secret" class="col-sm-3 control-label">{{ 'Google Secret'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="google_secret" title="{{ 'Google Secret'|lang }}" value="{% if _ADMIN_TEST_MODE_ %}test{% else %}{{ settings.google_secret }}{% endif %}" class="target_google_login form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+		</div>
+	</div>
+</form>
+{% endblock %}
+	

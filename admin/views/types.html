@@ -1,0 +1,106 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="{{ 'Add type'|lang }}">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">{{ 'Add type'|lang }}</h4>
+			</div>
+			<form method="post">
+				<input type="hidden" name="action" value="add_type">
+				<input type="hidden" name="token" value="{{ generateToken('admin_add_type') }}">
+				<div class="modal-body">
+					<label>{{ 'The name'|lang }}</label>
+					<input type="text" name="name" required maxlength="64" placeholder="{{ 'The name'|lang }}" title="{{ 'The name'|lang }}" class="form-control">
+				</div>
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+					<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-tree-deciduous"></span> {{ 'Types'|lang }}</h1>
+	<p>{{ 'Here you can edit the types on the site'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+	
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add">{{ 'Add type'|lang }}</button>
+<br><br>
+{% if types %}
+	<table class="table table-striped table-bordered table-condensed">
+		<tr>
+			<th></th>
+			<th>{{ 'The name'|lang }}</th>
+			<th class="text-center">{{ 'Edit'|lang }}</th>
+			<th class="text-center">{{ 'Remove'|lang }}</th>
+		</tr>
+			
+		{% for item in types %}
+			<tr>
+				<td>{{ loop.index }}</td>
+				<td>{{ item.name }}</td>
+				<td class="text-center"><a href="#" title="{{ 'Edit'|lang }}" class="glyphicon glyphicon-edit" data-toggle="modal" data-target="#edit_{{ item.id }}"></a></td>
+				<td class="text-center"><a href="#" title="{{ 'Remove'|lang }}" class="glyphicon glyphicon-remove text-danger" data-toggle="modal" data-target="#remove_{{ item.id }}"></a></td>				
+			</tr>
+			
+			<div class="modal fade" id="edit_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Edit'|lang }}: {{ item.name }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Edit'|lang }}: {{ item.name }}</h4>
+						</div>
+						<form method="post">
+							<input type="hidden" name="action" value="edit_type">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_edit_type') }}">
+							<div class="modal-body">
+								<label>{{ 'The name'|lang }}</label>
+								<input type="text" name="name" required maxlength="64" placeholder="{{ 'The name'|lang }}" title="{{ 'The name'|lang }}" value="{{ item.name }}" class="form-control">
+							</div>
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal fade" id="remove_{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ 'Remove type'|lang }}: {{ item.name }}">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">{{ 'Remove type'|lang }}</h4>
+						</div>
+						<form method="post">
+							<input type="hidden" name="action" value="remove_type">
+							<input type="hidden" name="id" value="{{ item.id }}">
+							<input type="hidden" name="token" value="{{ generateToken('admin_remove_type') }}">
+							<div class="modal-body">
+								<p>{{ 'Are you sure you want to remove a type'|lang }}: "{{ item.name }}"?</p>
+							</div>
+							<div class="modal-footer">
+								<input type="button" class="btn btn-default" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+								<input type="submit" class="btn btn-danger" value="{{ 'Execute'|lang }}">
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+	
+		{% endfor %}		
+	</table>
+{% else %}
+	<h4 class="text-danger">{{ 'Nothing found'|lang }}</h4>
+{% endif %}
+{% endblock %}

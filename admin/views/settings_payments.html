@@ -1,0 +1,277 @@
+
+{% extends "main.tpl" %}
+
+{% block content %}
+<div class="page-header">
+	<h1><span class="glyphicon glyphicon-asterisk"></span> {{ 'Payment settings'|lang }}</h1>
+	<p>{{ 'Here you can edit the settings of the service'|lang }}</p>
+</div>
+
+{% include 'alert.tpl' %}
+
+<form method="post" class="form-horizontal" role="form">
+	<input type="hidden" name="action" value="save_settings_payments">
+	<input type="hidden" name="token" value="{{ generateToken('admin_save_settings_payments') }}">
+	<div class="form-group">
+		<label for="currency" class="col-sm-3 control-label">{{ 'Shortcut currency'|lang }}:</label>
+		<div class="col-sm-9">
+			<input type="text" name="currency" placeholder="zł" title="{{ 'Shortcut currency'|lang }}" value="{{ settings.currency }}" class="form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="add_cost" class="col-sm-3 control-label">{{ 'The cost of issuing offer'|lang }}:</label>
+		<div class="col-sm-9">
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="add_cost" title="{{ 'The cost of issuing offer'|lang }}" value="{{ settings.add_cost }}" class="form-control">
+				<div class="input-group-addon">{{ settings.currency }}</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_days" class="col-sm-3 control-label">{{ 'Promoting - the number of days'|lang }}:</label>
+		<div class="col-sm-4"><!--promowanie dni 30-->
+			<input type="number" min="1" step="1" name="promote_days" title="{{ 'Promoting - the number of days'|lang }}" value="{{ settings.promote_days }}" class="form-control" required>
+		</div>
+		<div class="col-sm-4"><!--promowanie dni 60-->
+			<input type="number" min="1" step="1" name="promote_days02" title="{{ 'Promoting - the number of days'|lang }}" value="{{ settings.promote_days02 }}" class="form-control" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_cost" class="col-sm-3 control-label"title="Koszt promowanie Lokalnie">{{ 'The cost of a promote'|lang }}:</label>
+		<div class="col-sm-4"><!--OGŁOSZENIE LOKALNIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #004085;
+				background-color: #b8daff;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Lokalnie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60 DNI-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost_0" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost_0 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #004085;
+				background-color: #b8daff;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za {{ settings.promote_days02 }} dni.
+				  </span></div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_cost" class="col-sm-3 control-label"title="Koszt promowanie regionalnie">{{ 'The cost of a promote'|lang }} R:</label>
+		<div class="col-sm-4"><!--OGŁOSZENIE REGIONALNIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost1" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost1 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #155724;
+				background-color: #c3e6cb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Regionalnie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60 DNI-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost1_5" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost1_5 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #155724;
+				background-color: #c3e6cb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za {{ settings.promote_days02 }} dni
+				  </span></div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_cost" class="col-sm-3 control-label"title="Koszt promowania ogólnopolskie">{{ 'The cost of a promote'|lang }} O:</label>
+		<div class="col-sm-4"><!--OGŁOSZENIE OGÓLNOPOLSKIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost2" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost2 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #0c5460;
+				background-color:#bee5eb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Ogólnopolskie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60 DNI-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="promote_cost2_5" title="{{ 'The cost of a promote'|lang }}" value="{{ settings.promote_cost2_5 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #0c5460;
+				background-color:#bee5eb">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za {{ settings.promote_days02 }} dni
+				  </span></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="promote_only_by_author" title="{{ 'Only logged user who added offer can promote it'|lang }}" {% if settings.promote_only_by_author %}checked{% endif %}> {{ 'Only logged user who added offer can promote it'|lang }}</label>
+		</div>
+	</div>
+	<hr>   <!--***********Koszt dodania reklamy************----------->
+	<div class="form-group">
+	<div class="col-sm-9 col-sm-offset-3">
+		<label>Koszt dodania reklamy</label>
+	</div>
+		<label for="settings.Ad_price_1" class="col-sm-3 control-label"title="Koszt reklamy Lokalnie">{{ 'The cost of a ad'|lang }}:</label>
+		<div class="col-sm-4"><!--REKLAMA LOKALNIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_1" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_1 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #004085;
+				background-color: #b8daff;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Lokalnie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_1_5" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_1_5 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #004085;
+				background-color: #b8daff;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za 60 dni
+				  </span></div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_cost" class="col-sm-3 control-label"title="Koszt reklamy regionalnie">{{ 'The cost of a ad'|lang }} R:</label>
+		<div class="col-sm-4"><!--REKLAMA REGIONALNIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_2" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_2 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #155724;
+				background-color: #c3e6cb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Regionalnie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_2_5" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_2_5 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #155724;
+				background-color: #c3e6cb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za 60 dni
+				  </span></div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="promote_cost" class="col-sm-3 control-label"title="Koszt reklamy ogólnopolskie">{{ 'The cost of a ad'|lang }} O:</label>
+		<div class="col-sm-4"><!--REKLAMA OGÓLNOPOLSKIE-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_3" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_3 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #0c5460;
+				background-color:#bee5eb;">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					Ogólnopolskie
+				  </span></div>
+			</div>
+		</div>
+
+		<div class="col-sm-4"><!--60-->
+			<div class="input-group">
+				<input type="number" min="0" step="0.01" name="Ad_price_3_5" title="{{ 'The cost of a ad'|lang }}" value="{{ settings.Ad_price_3_5 }}" class="form-control">
+				<div class="input-group-addon"style="max-width: 150px;color: #0c5460;
+				background-color:#bee5eb">{{ settings.currency }}<span class="d-inline-block text-truncate" style="max-width: 150px;">
+					za 60 dni
+				  </span></div>
+			</div>
+		</div><!--***********Koszt dodania reklamy************----------->
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="pay_by_dotpay" title="{{ 'Pay by Dotpay'|lang }}" {% if settings.pay_by_dotpay %}checked{% endif %} class="set_required" data-target="target_pay_by_dotpay"> {{ 'Pay by Dotpay'|lang }}</label><img src="images/dotpay_logo.png" class="rounded float-left" alt="Dotpay"style="margin-left:5px;"><p><a href="https://ssl.dotpay.pl/s2/login/cloudfs1/magellan_media/common_file/dotpay_instrukcja_techniczna_implementacji_platnosci.pdf" title="Dotpay" target="_blank">{{ 'Manual'|lang }}</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="dotpay_id" class="col-sm-3 control-label">{{ 'Dotpay ID'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="dotpay_id" title="{{ 'Dotpay ID'|lang }}" value="{{ settings.dotpay_id }}" class="target_pay_by_dotpay form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="dotpay_pin" class="col-sm-3 control-label">{{ 'Dotpay PIN'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="dotpay_pin" title="{{ 'Dotpay PIN'|lang }}" value="{% if _ADMIN_TEST_MODE_ %}test{% else %}{{ settings.dotpay_pin }}{% endif %}" class="target_pay_by_dotpay form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="dotpay_currency" class="col-sm-3 control-label">{{ 'Dotpay currency'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="dotpay_currency" title="{{ 'Dotpay currency'|lang }}" value="{{ settings.dotpay_currency }}" class="target_pay_by_dotpay form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="dotpay_test_mode" title="{{ 'Dotpay Test Mode'|lang }}" {% if settings.dotpay_test_mode %}checked{% endif %}> {{ 'Dotpay Test Mode'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="pay_by_paypal" title="{{ 'Pay by PayPal'|lang }}" {% if settings.pay_by_paypal %}checked{% endif %} class="set_required" data-target="target_pay_by_paypal"> {{ 'Pay by PayPal'|lang }}</label><img src="images/paypal_logo.png" class="rounded float-left" alt="PayPal">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="paypal_email" class="col-sm-3 control-label">{{ 'PayPal email'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="email" name="paypal_email" title="{{ 'PayPal email'|lang }}" value="{{ settings.paypal_email }}" class="target_pay_by_paypal form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="paypal_lc" class="col-sm-3 control-label">{{ 'PayPal location'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="paypal_lc" title="{{ 'PayPal location'|lang }}" value="{{ settings.paypal_lc }}" class="target_pay_by_paypal form-control">
+			<p><a href="https://developer.paypal.com/docs/classic/api/country_codes/" title="Country Codes" target="_blank">https://developer.paypal.com/docs/classic/api/country_codes/</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="paypal_currency" class="col-sm-3 control-label">{{ 'PayPal currency'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="paypal_currency" title="{{ 'PayPal currency'|lang }}" value="{{ settings.paypal_currency }}" class="target_pay_by_paypal form-control">
+			<p><a href="https://developer.paypal.com/docs/classic/api/currency_codes/" title="Currency" target="_blank">https://developer.paypal.com/docs/classic/api/currency_codes/</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="paypal_test_mode" title="{{ 'PayPal Test Mode'|lang }}" {% if settings.paypal_test_mode %}checked{% endif %}> {{ 'PayPal Test Mode'|lang }}</label>
+		</div>
+	</div>
+	<hr>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="pay_by_p24" title="{{ 'Pay by Przelewy24'|lang }}" {% if settings.pay_by_p24 %}checked{% endif %} class="set_required" data-target="target_pay_p24"> {{ 'Pay by Przelewy24'|lang }}</label>
+			<p><a href="https://www.przelewy24.pl/storage/app/media/pobierz/Instalacja/przelewy24_dokumentacja_3.2.pdf" title="Przelewy24" target="_blank">{{ 'Manual'|lang }}</a></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="p24_merchant_id" class="col-sm-3 control-label">{{ 'Przelewy24 - Merchant ID'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="p24_merchant_id" title="{{ 'Przelewy24 - Merchant ID'|lang }}" value="{{ settings.p24_merchant_id }}" class="target_pay_p24 form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="p24_pos_id" class="col-sm-3 control-label">{{ 'Przelewy24 - Pos ID'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="p24_pos_id" title="{{ 'Przelewy24 - Pos ID'|lang }}" value="{{ settings.p24_pos_id }}" class="target_pay_p24 form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="p24_crc" class="col-sm-3 control-label">{{ 'Przelewy24 - CRC'|lang }}:</label>
+		<div class="col-sm-4">
+			<input type="text" name="p24_crc" title="{{ 'Przelewy24 - CRC'|lang }}" value="{% if _ADMIN_TEST_MODE_ %}test{% else %}{{ settings.p24_crc }}{% endif %}" class="target_pay_p24 form-control">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<label><input type="checkbox" name="p24_sandbox" title="{{ 'Przelewy24 - sandbox'|lang }}" {% if settings.p24_sandbox %}checked{% endif %}> {{ 'Przelewy24 - sandbox'|lang }}</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-9 col-sm-offset-3">
+			<input type="submit" value="{{ 'Save'|lang }}" class="btn btn-primary">
+		</div>
+	</div>
+</form>
+{% endblock %}

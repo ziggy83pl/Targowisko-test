@@ -1,0 +1,57 @@
+
+{% extends "main.tpl" %}  
+
+{% block content %}
+
+<div class="page_box">
+	<div class="container">
+		<div class="text-center">
+			<h2>{{ article.name }}</h2>
+			<p class="text-muted small">{{ 'Published'|lang }}: {{ article.date|date("d-m-Y") }}</p>
+			<p><a href="{{ path('articles') }}" title="{{ 'Return to the list of articles'|lang }}" class="main-color-1">{{ 'Return to the list of articles'|lang }}</a></p>
+		</div>
+		<br>
+		<div class="content">
+			{{ article.content|raw }}
+		</div>
+		{% if settings.allow_comments_fb_article %}
+			<br>
+			<div class="fb-comments" data-href="{{ path('article',article.id,article.slug) }}" data-numposts="15"></div>
+		{% endif %}
+		<br>
+		{% if settings.social_facebook %}
+			<div class="social_inline_block" style="padding-top: 2px;">
+				<div class="fb-like" data-href="{{ path('article', article.id, article.slug) }}" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>		
+			</div>
+		{% endif %}
+		{% if settings.social_twitter %}
+			<div class="social_inline_block">
+				<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{ path('article', article.id, article.slug) }}" data-lang="{{ settings.lang }}">Tweet</a>
+				<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+			</div>
+		{% endif %}
+		{% if settings.social_wykop %}
+			<div class="social_inline_block">
+				<script>
+					var widget_url='https://www.wykop.pl/dataprovider/diggerwidget/?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)+'&desc='+encodeURIComponent('{{ settings.description }}')+'&bg='+('FFFFFF')+'&type='+('compact2')+'&bold='+(true);
+					document.write('<div><iframe src="'+widget_url+'" style="border:none;width:100px;height:20px;overflow:hidden;margin:0;padding:0;" frameborder="0" border="0"></iframe></div>');
+				</script>
+			</div>
+		{% endif %}
+		{% if settings.social_google_plus %}
+			<div class="social_inline_block">
+				<script src="https://apis.google.com/js/platform.js" async defer>lang: '{{ settings.lang }}'</script>
+				<div class="g-plusone" data-size="medium"></div>
+			</div>
+		{% endif %}
+		{% if settings.social_pinterest %}
+			<div class="social_inline_block" style="padding-top: 2px;">
+				<a href="//www.pinterest.com/pin/create/button/?url={{ path('article', article.id, article.slug) }}" data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a>
+				<script async src="//assets.pinterest.com/js/pinit.js"></script>
+			</div>
+		{% endif %}
+	</div>
+</div>
+
+{% endblock %}
+

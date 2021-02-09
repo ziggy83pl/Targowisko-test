@@ -1,0 +1,337 @@
+
+{% extends "main.tpl" %}
+
+{% block javascript %}
+	{{ parent() }}
+	<script src="js/angular.min.js"></script>
+	<script src="js/ckeditor/ckeditor.js"></script>
+	<script src="js/jquery-sortable.js"></script>
+	<script>
+		var photo_max = {{ settings.photo_max|escape('js') }};
+		var list_categories = list_options = [];
+		var inputPrice = '';
+		{% if offer %}
+			list_categories = {{ offer.categories|json_encode()|raw }};
+			{% if offer.options %}list_options = {{ offer.options|json_encode()|raw }}{% endif %};
+			inputPrice = '{{ offer.price|escape('js') }}';
+		{% endif %}
+		var required_category = "{{ settings.required_category|escape('js') }}";
+		var required_subcategory = "{{ settings.required_subcategory|escape('js') }}";
+		var lang = {'Photo limit exceeded':"{{ 'Photo limit exceeded'|lang }}"};
+	</script>
+	<script src="views/{{ settings.template }}/js/add.js?{{ settings.assets_version }}"></script>
+	{% if settings.google_maps %}
+	<!--google maps script to fixed-->
+		<script>
+			var google_maps, google_maps_marker;
+			function displayMap() {
+				autocomplete = new google.maps.places.Autocomplete((document.getElementById('add_address')), {types: ['geocode']});
+				google.maps.event.addDomListener(window, "load", function() {
+					{% if offer and (offer.address_lat!=0 or offer.address_long!=0) %}var myLatlng = new google.maps.LatLng({{ offer.address_lat }},{{ offer.address_long }});{% endif %}
+					google_maps = new google.maps.Map(document.getElementById("google_maps"), {
+						center: new google.maps.LatLng( {% if offer and (offer.address_lat!=0 or offer.address_long!=0) %}{{ offer.address_lat }},{{ offer.address_long }}{% else %}{{ settings.google_maps_lat }},{{ settings.google_maps_long }}{% endif %}),
+						zoom: {{ settings.google_maps_zoom_add|default(8) }},
+						scrollwheel:  false
+					});
+					google_maps_marker = new google.maps.Marker({
+						draggable: true,
+						{% if offer and (offer.address_lat!=0 or offer.address_long!=0) %}position: myLatlng,{% endif %}
+						map: google_maps
+					});
+					google.maps.event.addListener(google_maps_marker, 'dragend', function (event) {
+						$('input[name=address_lat]').val(this.getPosition().lat());
+						$('input[name=address_long]').val(this.getPosition().lng());
+					});
+					google.maps.event.addListener(google_maps, 'click', function (mapEvent) {
+						google_maps.panTo(mapEvent.latLng);
+						google_maps_marker.setPosition(google_maps.getCenter());
+						$('input[name=address_lat]').val(google_maps_marker.getPosition().lat());
+						$('input[name=address_long]').val(google_maps_marker.getPosition().lng());
+					});
+				});
+			}
+		</script>
+		<script src="https://maps.googleapis.com/maps/api/js?key={{ settings.google_maps_api }}&v=3.exp&libraries=places&callback=initGoogleMap" async defer></script>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page_box">
+	<div class="container" id="box_add_offer">
+		<div class="text-center">
+			{% if offer and not offer.add_similar %}
+				<h1>{{ 'Edit offer'|lang }}</h1>
+				<h3>{{ 'Here you can edit offer'|lang }}</h3>
+				<h4><a href="{{ path('offer',offer.id,offer.slug) }}{% if not offer.user_id %}?code={{ offer.code }}{% endif %}" title="{{ offer.name }}" class="text-primary" target="_blank">{{ 'See offer'|lang }}</a></h4>
+				<p><a href="#" title="{{ 'Delete offer'|lang }}: {{ offer.name }}" class="text-danger" data-toggle="modal" data-target="#remove_offer">{{ 'Delete offer'|lang }}</a></p>
+			{% else %}
+				<h1>{{ 'Add offer'|lang }}</h1>
+				<h3>{{ 'Here you can add a new offer to the system'|lang }}</h3>
+			{% endif %}
+		</div>
+		{% include 'alert.tpl' %}
+		<br>
+		<form method="post" id="form_add_offer" ng-app="addOffer" ng-controller="addOffer" action="">
+			<input type="hidden" name="action" value="{% if offer and not get.add_similar %}edit{% else %}add{% endif %}">
+			<input type="hidden" name="session_code" value="{{ session_code }}">
+			<div class="form-group row">
+				<label for="name" class="col-sm-3 col-form-label">{{ 'Title'|lang }}:<span class="text-danger">&nbsp;*</span></label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="name" placeholder="{{ 'My title...'|lang }}" id="name" maxlength="{{ settings.number_char_title }}" required {% if offer %}value="{{ offer.name }}" ng-init="inputName='{{ offer.name }}'"{% endif %} title="{{ 'Enter the title'|lang }}" ng-model="inputName" ng-trim="false">
+					<p class="text-muted small" style="margin:2px 2px 0">{{ 'Chars'|lang }}: {{ '{{inputName ? inputName.length : 0}}' }} / {{ settings.number_char_title }}</p>
+				</div>
+			</div>
+			{% if types %}
+				<div class="form-group row">
+					<label for="type_id" class="col-sm-3 col-form-label">{{ 'Offer type'|lang }}:{% if settings.required_type %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+					<div class="col-sm-9">
+						<div class="row">
+							<div class="col-lg-4 col-md-6">
+								<select class="form-control" name="type_id" id="type_id" title="{{ 'Select the appropriate offer type'|lang }}" {% if settings.required_type %}required{% endif %}>
+									<option value="">{{ '-- select --'|lang }}</option>
+									{% for type in types %}
+										<option value="{{ type.id }}" {% if offer and offer.type_id==type.id %}selected{% endif %}>{{ type.name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif %}
+			<div class="form-group row" ng-hide="list_categories == null || list_categories.length == 0" ng-cloak>
+				<label for="category_id" class="col-sm-3 col-form-label ">{{ 'Category'|lang }}:{% if settings.required_category or settings.required_subcategory %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+				<div class="col-sm-9">
+					<div class="row"><!--filter test-->
+						<div class="col-lg-4 col-md-6" ng-repeat="cat in list_categories" style="margin-bottom:10px"  id="select_category_{{ '{{cat.category_id}}' }}'"  data-category_id="{{ '{{cat.category_id}}' }}'">
+							<select class="form-control" name="category_id" title="{{ 'Select the appropriate category'|lang }}" ng-required="{{ '{{cat.required}}' }}" id="Select1" ng-model="cat.selectCategory" ng-change="loadCategories({{ '{{cat.category_id}}' }},cat.selectCategory)" >
+								<option value="">{{ '-- select --'|lang }}</option>
+								<option value="{{ '{{item.id}}' }}" ng-repeat="item in cat.categories track by $index">{{ '{{item.name}}' }}</option>
+							</select>
+						</div>
+						<div class="col-lg-4 col-md-6" id="icon_load_categories" ng-show="waiting_for_response"><span class="fas fa-spinner fa-spinner-animate"></span></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row" ng-repeat="item in list_options track by $index" ng-cloak>
+				<label for="options[{{ '{{item.id}}' }}]" class="col-sm-3  col-form-label ">{{ '{{item.name}}' }}:<span class="text-danger" ng-show="{{ '{{item.required}}' }}">&nbsp;*</span></label>
+				<div class="col-sm-9" ng-switch on="item.kind">
+					<input ng-switch-when="text" class="form-control" type="text" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+					<input ng-switch-when="number" class="form-control" type="number" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+					<select ng-switch-when="select" class="form-control" name="options[{{ '{{item.id}}' }}]" ng-required="{{ '{{item.required}}' }}" ng-model="item.value">
+						<option value="">{{ '-- select --'|lang }}</option>
+						<option value="{{ '{{item2}}' }}" ng-repeat="item2 in item.choices">{{ '{{item2}}' }}</option>
+					</select>
+					<div ng-switch-when="checkbox" class="row">
+						<div class="col-sm-6 col-md-4" ng-repeat="item2 in item.choices"><label class="checkbox-inline"><input type="checkbox" name="options[{{ '{{item.id}}' }}][]" value="{{ '{{item2}}' }}" ng-checked="item.value.indexOf(item2) > -1"> {{' {{item2}}' }}</label></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group row" ng-show="showPrice">
+				<label for="price" class="col-sm-3 col-form-label">{{ 'Price'|lang }}:<span class="text-danger" ng-show="requiredPrice">&nbsp;*</span></label>
+				<div class="col-lg-3 col-md-6 col-sm-9" ng-model="inputPriceFree">
+					<div ng-hide="inputPriceFree">
+						<div class="input-group">
+							<input type="number" name="price" min="0" max="100000000" class="form-control" step="0.01" {% if offer %}value="{{ offer.price }}"{% endif %} ng-disabled="inputPriceFree || !showPrice" ng-required="requiredPrice" ng-model="inputPrice"><div class="input-group-append">
+								<span class="input-group-text">{{ settings.currency }}</span>
+							</div>
+						</div>
+						<div ng-show="inputPrice">
+							<label><input type="checkbox" name="price_negotiate" {% if offer and offer.price_negotiate %}checked{% endif %} ng-disabled="inputPriceFree || !showPrice || !inputPrice"> {{ 'To negotiate'|lang }}</label><br>
+						</div>
+					</div>
+					<label style="margin-top:5px"><input type="checkbox" name="price_free" {% if offer and offer.price_free %}checked ng-init="inputPriceFree=true"{% endif %} ng-model="inputPriceFree" ng-disabled="!showPrice"> {{ 'For free'|lang }}</label>
+				</div>
+			</div>
+			{% if not offer or offer.add_similar %}
+				<div class="form-group row">
+					<label for="type" class="col-sm-3 col-form-label">{{ 'The length of the display'|lang }}: </label>
+					<div class="col-lg-3 col-md-6 col-sm-9">
+						<select name="days" class="form-control" required onclick="document.getElementById('time').style.display='none'">
+							{% if offersDays %}
+								{% for day in offersDays %}
+									<option value="{{ day.id }}">{{ day.length }} {{ 'days'|lang }} - {{ day.cost|showCurrency }}</option>
+								{% endfor %}
+							{% else %}
+								<option value="0">{{ settings.days_default }} {{ 'days'|lang }}</option>
+							{% endif %}
+						</select>
+					</div>
+					<div class="days" id="time" title="Wybierz długość wyświetlania Twojego ogłoszenia przez dłuższy czas!"><i class="fas fa-arrow-circle-left"></i> Wybierz czas wyświetlania!</div>
+				</div>
+			{% endif %}
+			<hr>
+			<div class="form-group row">
+				<label for="description" class="col-sm-3 col-form-label">{{ 'Offer description'|lang }}:<div class="info1" title="Zalety na Targowisko">
+					<ul>
+						<li><div class="far fa-clock"></div>
+							Dodawanie ogłoszeń jest darmowe.</li>
+						<li><div class="far fa-check-circle"></div>
+							Bezpłatne odświeżanie ogłoszeń po 30 dniach.</li>
+						<li><div class="fab fa-product-hunt"></div>
+							Możesz promować swoje ogłoszenie.</li>
+							
+						<li><div class="fas fa-chart-line"></div>
+							
+							<a href="https://targowisko.org/dodaj_reklame">	Dodaj reklamę swojej firmy!</a></li>
+					</ul>
+				</div>
+				</label>	
+				<div class="col-sm-9">
+					<textarea id="description" name="description" class="form-control" style="height: 150px">{% if offer %}{{ offer.description|raw }}{% endif %}</textarea>				
+				</div>
+				
+			</div>
+			{% if settings.photo_add %}
+				<hr>
+				<div class="form-group row">
+					<div class="col-sm-3 col-form-label">
+						<label>{{ 'Photos'|lang }}:</label>
+						{% if settings.photo_max %}<p class="small">{{ 'Limit photos'|lang }}: {{ settings.photo_max }}</p>{% endif %}
+					</div>				
+					<div class="col-sm-9">
+						<!--test drag and drop, ondrop="drag_drop(e);" ondragover="return false"--> 
+						<div id="drop-area" class="uploadfile">					
+						<div class="progress" id="photos_progress">
+							<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+								0%
+							</div>
+						</div>
+						<div class="alert alert-danger" role="alert" id="photos_info"></div>
+						<div id="preview_photos">
+							{% if offer.photos %}
+								{% for photo in offer.photos %}
+									<div class="img-thumbnail">
+										<img src="upload/photos/{{ photo.folder }}{{ photo.thumb }}" alt="{{ photo.url }}">
+										<br><a href="#" title="{{ 'Remove photo'|lang }}: {{ photo.url }}" class="remove_photo text-danger">{{ 'Remove'|lang }}</a>
+										<input type="hidden" name="photos[]" value="{{ photo.id }}">
+									</div>
+								{% endfor %}
+							{% endif %}
+							<div id="preview_load"><span class="fas fa-spinner fa-spinner-animate"></span></div>
+						</div>
+						<br>
+						<div><!--add-->
+						<label for="input_select_photo" class="custom-input_select_photo "title="Tutaj możesz dodać zdjęcia"></label>
+						<input class=".custom-input_select_photo" id="input_select_photo" type="file" name="file" title="{{ 'Here you can add photos to the offer'|lang }}" multiple accept="image/jpeg, image/png"  alt="Dodaj zdjęcie"hidden onchange="handleFiles(this.files)" ></div>
+						<!--<div id="info" alt="dodaj zdjęcia" title="Będzie lepiej, gdy dodasz zdjęcia.onclick="document.getElementById('info').style.display='none'""></div>-->
+						<div style="clear:both;"></div>
+					</div><!--test drag and drop-->						
+				</div>
+			</div> 
+			{% endif %}
+			<hr>
+			<div class="form-group row">
+				<label for="email" class="col-md-2 col-sm-4 col-form-label"><i class="fas fa-at"></i> {{ 'E-mail address'|lang }}:<span class="text-danger">&nbsp;*</span></label>
+				<div class="col-md-4 col-sm-8">
+					<input type="email"
+					 class="form-control" 
+					 name="email" 
+					 placeholder="{{ 'example@example.com'|lang }}" 
+					 id="email" 
+					 maxlength="64" 
+					 required value="{% if offer %}{{ offer.email }}{% elseif user.id %}{{ user.email }}{% endif %}" 
+					 title="{{ 'Enter your email address'|lang }}" {% if (user.id and not user.moderator) or (offer and not user.moderator) %}readonly{% endif %}>
+				</div> <!--doawanie numeru telefonu-->
+				<label for="phone" class="col-md-2 col-sm-4 col-form-label"><i class="fas fa-phone"></i> {{ 'Phone'|lang }}:{% if settings.required_phone %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+				<div class="col-md-4 col-sm-8">
+					<input type="tel" class="form-control" name="phone" placeholder="{{ '+12 345 678 901'|lang }}" id="phone" maxlength="32" value="{% if offer %}{{ offer.phone }}{% elseif user.id %}{{ user.phone }}{% endif %}" title="{{ 'Enter the phone number'|lang }}" {% if settings.required_phone %}required{% endif %}>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="add_address" class="col-sm-2 col-form-label"><i class="fas fa-map-marker-alt"></i> {{'Address'|lang }}:{% if settings.required_address %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control getCoordinates" name="address" placeholder="{{ '1600 Pennsylvania Avenue NW, Washington, D.C. 20500'|lang }}" id="add_address" maxlength="512" value="{% if offer %}{{ offer.address }}{% elseif user.id %}{{ user.address }}{% endif %}" title="{{ 'Enter the address'|lang }}" {% if settings.required_address %}required{% endif %}>
+				</div>
+			</div>
+			<div class="form-group row">
+				{% if states %}
+					<label for="state_id" class="col-sm-2 col-form-label"><i class="fas fa-map"></i>{{ 'State'|lang }}:{% if settings.required_state %}<span class="text-danger">&nbsp;*</span>{% endif %}</label>
+					<div class="col-sm-4">
+						<select class="form-control select_state" name="state_id" id="state_id" title="{{ 'Select the appropriate state'|lang }}" {% if settings.required_state %}required{% endif %}>
+							<option value="">{{ '-- select --'|lang }}</option>
+							{% for key,state in states %}
+								<option value="{{ key }}" {% if (offer and offer.state_id==key) or (not offer and user.id and user.state_id==key) %}selected{% endif %}>{{ state.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					{% for key,state in states %}
+						{% if state.states %}
+							<div class="col-sm-4 substates substate_{{ state.id }}" {% if not ((offer and offer.state_id==key) or (not offer and user.id and user.state_id==key)) %}style="display: none"{% endif %}>
+								<select class="form-control" name="state2_id" title="{{ 'Select the appropriate state'|lang }}" {% if not ((offer and offer.state_id==key) or (not offer and user.id and user.state_id==key)) %}disabled{% endif %}>
+									<option value="">{{ '-- select --'|lang }}</option>
+									{% for state2 in state.states %}
+										<option value="{{ state2.id }}" {% if (offer and offer.state2_id==state2.id) or (not offer and user.state2_id==state2.id) %}selected{% endif %}>{{ state2.name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+				{% if settings.google_maps and settings.google_maps_api %}
+					<div class="col-sm-2 pull-right">
+						<input type="button" class="btn btn-secondary btn-sm pull-right" value="{{ 'Show on map'|lang }}" id="button_get_coordinates" style="margin-top:4px">
+					</div>
+				{% endif %}
+			</div>
+			{% if settings.google_maps %}
+				<div id="google_maps" style="height: 300px"></div>
+			{% endif %}
+			<input type="hidden" name="address_lat" value="{{ offer.address_lat }}">
+			<input type="hidden" name="address_long" value="{{ offer.address_long }}">
+			<br><br>
+			{% if not user.id and not offer %}
+				<div class="form-group row">
+					<div class="col-sm-12">
+						<div class="checkbox">
+							<label id="rules">
+								<input type="checkbox" name="rules" required  id="lock" hidden> <i class="fas fa-unlock-alt icon"></i>
+								 {{ 'Accepts the terms and conditions and the privacy policy'|lang }} (<a href="{{ path('rules') }}" title="{{ 'Terms of service'|lang }}" target="_blank" class="main-color-2">{{ 'Terms of service'|lang }}</a> - <a href="{{ path('privacy_policy') }}" title="{{ 'Privacy policy'|lang }}" target="_blank" class="main-color-2">{{ 'Privacy policy'|lang }}</a>)<span class="text-danger">&nbsp;*</span>
+							</label>
+						</div>
+					</div>
+				</div>
+			{% endif %}
+			<div class="form-group text-center">
+				<input type="submit" class="btn btn-primary text-uppercase" value="{{ 'Save'|lang }}" ng-disabled="waiting_for_response" onclick="pozyczki()">
+			</div>
+			<br><br>
+			<p class="text-left"><span class="text-danger">*</span> - {{ 'required field'|lang }}</p>
+			<br>
+			<div class="payment">
+				<img src="{{ settings.base_url }}/views/{{ settings.template }}/images/pay/dotpay_logo.png" class="rounded float-left" alt="Dotpay" title="Zapłać za pomocą dotpay">
+				<img src="{{ settings.base_url }}/views/{{ settings.template }}/images/pay/paypal_logo.png" class="rounded float-left" alt="PayPal" title="Zapłać za pomocą PayPal">
+			<br/>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% if offer and not offer.add_similar %}
+	<div class="modal fade" id="remove_offer">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">{{ 'Delete offer'|lang }}: {{ offer.name }}</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<form method="post" class="form">
+					<input type="hidden" name="action" value="remove_offer">
+					<input type="hidden" name="id" value="{{ offer.id }}">
+					<input type="hidden" name="code" value="{{ get.code }}">
+					<input type="hidden" name="token" value="{{ generateToken('remove_offer') }}">
+					<div class="modal-body">
+						<p>{{ 'Are you sure you want to delete offer'|lang }} {{ offer.name }}?</p>
+					</div>
+					<div class="modal-footer">
+						<input type="button" class="btn btn-secondary" data-dismiss="modal" value="{{ 'Cancel'|lang }}">
+						<input type="submit" class="btn btn-danger" value="{{ 'Remove'|lang }}">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,44 @@
+
+{% extends "main.tpl" %}  
+
+{% block content %}
+
+<div class="page_box">
+	<div class="container">
+		{% if info_page %}
+			<h2>{{ info_page.name }}</h2>
+			<p><a href="{{ path('info') }}" title="{{ 'Return to the list of pages'|lang }}" class="main-color-1">{{ 'Return to the list of pages'|lang }}</a></p>
+			<br>
+			<div class="content">
+				{{ info_page.content|raw }}
+			</div>
+		{% else %}
+			<h2>{{ 'Info'|lang }}</h2>
+			<br>
+			<ul class="list-group">
+				{% for item in info %}
+					<li class="list-group-item"><a href="{% if item.page=='contact' %}{{ path('contact') }}{% else %}{{ path('info',item.id,item.slug) }}{% endif %}" title="{{ item.name }}" class="main-color-2">{{ item.name }}</a></li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+		<br>
+		<div class="ads-title" alt="Dodaj reklamę" title="Dodaj reklamę."> 
+			<hr>
+				<a href="https://targowisko.org/dodaj_reklame">	
+					<h2>Dodaj reklamę.</h2>
+				</a>
+					<div class="ads">
+						<a href="https://targowisko.org/dodaj_reklame">
+							<img alt="" src="upload/photos/2019/09//reklama_1.png">		
+						</a>
+									<a class="ads-fb" href="http://www.facebook.com/Targowisko-darmowe-og%C5%82oszenia-1853942881321358/" target="_blank">
+							<i class="fab fa-facebook-f"></i>
+						</a>
+								</div>
+					<hr>
+			</div>
+	</div>
+</div>
+
+{% endblock %}
+
