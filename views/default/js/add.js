@@ -360,7 +360,7 @@ $(document).on("click", ".remove_photo", function(){
 
 
 
-			;
+			
 			
 			
 			  
