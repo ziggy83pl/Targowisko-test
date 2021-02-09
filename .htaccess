@@ -1,6 +1,6 @@
 
 <FilesMatch ".php">
-SetHandler "proxy:unix:/usr/local/php72-fpm/sockets/serwer24113.sock|fcgi://localhost"
+SetHandler "proxy:unix:/usr/local/php72-fpm/sockets/*********|fcgi://localhost"
 </FilesMatch>
 RewriteEngine on
 
