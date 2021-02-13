@@ -8,3 +8,4 @@ $.post(
         console.log(response);
     }
 );
+//the script refreshes the added photo if it does not show up on the fanpage
