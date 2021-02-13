@@ -1,5 +1,2 @@
-# Targowisko to jest nazwa tej strony.
-Jakiś czas temu założyłem tą stronę jako eksperyment do nauki kodowania, ta strona nie jest w stanie utrzymać się samodzielnie na serwerze, nie jest też w stanie pokryć kosztów domeny, ale za to, sprawia mi dużą przyjemność podczas kodowani. 
-To jest hobbistyczna strona poświęcona ogłoszeniom w Polsce, zachęcam do ulepszenia kodu.
-Proszę napisać co powinienem lepiej opisać lub gdzie powinienem dodać jakieś wskazówki?
-Dopiero zaczynam z Githube tak więc proszę o wyrozumiałość.
+# Targowisko this is the name of this page.
+Some time ago I set up this site as an experiment to learn to code, this site is not able to support itself on the server, and it is not able to cover the cost of the domain, but I enjoy coding. This is a hobby website dedicated to classifieds in Poland, I encourage you to improve the code. Please write down what should I describe better or where should I add some tips? I'm just getting started with Githube so please be understanding.
