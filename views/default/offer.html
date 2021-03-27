@@ -64,13 +64,13 @@
 					<input type="submit" value="{{ 'Add to clipboard'|lang }}" class="btn btn-outline-secondary btn-sm">
 				{% endif %}
 			</form><!--Offer.html-->
-			<h1 itemprop="name" style="overflow-wrap: break-word;">{{ offer.name }}</h1>
+			<h1 itemprop="name" class="offerName" style="overflow-wrap: break-word;">{{ offer.name }}</h1>
 			<p>
-				{% if offer.type_name %}[<a href="{{ path('offers') }}?type={{ offer.type_slug }}" title="{{ 'Offer type'|lang }}: {{ offer.type_name }}" class="main-color-2">{{ offer.type_name }}</a>]{% endif %}
+				{% if offer.type_name %}[<a href="{{ path('offers') }}?type={{ offer.type_slug }}" title="{{ 'Offer type'|lang }}: {{ offer.type_name }}" class="main-color-2 offer_type">{{ offer.type_name }}</a>]{% endif %}
 				{% if offer.categories %}
 					{% for category in offer.categories %}
 						<a href="{{ path('offers') }}?category={{ category.id }}" title="{{ 'Category'|lang }}: {{ item.name }}" class="main-color-2"><span {% if loop.last %}itemprop="category"{% endif %}>{{ category.name }}</span></a>
-						{% if not loop.last %} > {% endif %}
+						{% if not loop.last %} <i class="fas fa-chevron-right" style="color:#28a745;"></i> {% endif %}
 					{% endfor %}
 				{% endif %}
 			</p>
@@ -115,7 +115,7 @@
 			{% endif %}
 			{% if user.id==offer.user_id or user.moderator %}
 				<h6><a href="{{ path('edit',offer.id,offer.slug) }}" title="{{ 'Edit offer'|lang }}: {{ offer.name }}" class="text-primary"><i class="fas fa-pencil-alt" style="margin-right:0.5%"></i>{{ 'Edit offer'|lang }}</a> |
-				<a href="{{ path('add') }}/?add_similar={{ offer.id }}" title="{{ 'Add similar'|lang }}: {{ offer.name }}" class="text-success"><i class="fas fa-plus"style="margin-right:0.5%"></i>{{ 'Add similar'|lang }}</a></h6><br>
+				<a href="{{ path('add') }}/?add_={{ offer.id }}" title="{{ 'Add similar'|lang }}: {{ offer.name }}" class="text-success"><i class="fas fa-plus"style="margin-right:0.5%"></i>{{ 'Add similar'|lang }}</a></h6><br>
 			{% endif %}
 			{% include 'alert.tpl' %}
 			<div class="row">
@@ -148,7 +148,7 @@
 								{% if offer.username %}<tr><td><i class="far fa-user-circle"></i>{{ 'Added by'|lang }}: </td><td><a href="{{ path('profile',0,offer.username) }}" title="{{ 'Profile of'|lang }}: {{ offer.username }}" class="main-color-2">{% if offer.user_avatar %}<img src="upload/avatars/{{ offer.user_avatar }}" alt="{{ 'Avatar'|lang }}" class="img-fluid"> {% endif %}{{ offer.username }}</a></td></tr>{% endif %}
 
 
-								{% if offer.state_name %}<tr><td><i class="fas fa-map"></i>{{ 'State'|lang }}: </td><td><a href="{{ path('offers') }}?state={{ offer.state_slug }}" title="{{ 'State'|lang }}: {{ offer.state_name }}" class="main-color-2">{{ offer.state_name }}</a> {% if offer.state2_name %}<a href="{{ path('offers') }}?state={{ offer.state_slug }}&state2={{ offer.state2_slug }}" title="{{ 'State'|lang }}: {{ offer.state2.name }}" class="main-color-2">{{ offer.state2_name }}</a></td></tr>{% endif %}</td></tr>{% endif %}
+								{% if offer.state_name %}<tr><td><i class="fas fa-map"></i>{{ 'State'|lang }}: </td><td><a href="{{ path('offers') }}?state={{ offer.state_slug }}" title="{{ 'State'|lang }}: {{ offer.state_name }}" class="main-color-2">{{ offer.state_name }}</a> <i class="fas fa-chevron-right" style="color:#23579b;"></i>  {% if offer.state2_name %}<a href="{{ path('offers') }}?state={{ offer.state_slug }}&state2={{ offer.state2_slug }}" title="{{ 'State'|lang }}: {{ offer.state2.name }}" class="main-color-2">{{ offer.state2_name }}</a></td></tr>{% endif %}</td></tr>{% endif %}
 								{% if settings.hide_data_not_logged and not user.id %}
 									<tr><td colspan="2"><a href="{{ path('login') }}?redirect={{ offer.id }},{{ offer.slug }}" title="{{ 'Log in on the website'|lang }}" class="main-color-1">{{ 'You must be logged in to view contact details'|lang }}</a></td></tr>
 								{% else %}
@@ -200,7 +200,8 @@
 				</div>
 			</div>
 			<div id="offer_box_description">
-				<ul class="nav nav-tabs" role="tablist">
+				<!--offer box options-->
+				<ul class="nav nav-tabs display-inline" role="tablist">
 					<li class="nav-item active"><a href="#description" class="nav-link active main-color-2" data-toggle="tab" role="tab" aria-controls="description" aria-selected="true"title="Opis ogłoszenia">{{ 'Description'|lang }}
 							
 					</a></li>
@@ -224,7 +225,10 @@
 						</div>
 					{% endif %}
 					{% if (not settings.promote_only_by_author or (offer.user_id==user.id and user.id)) and (settings.pay_by_dotpay or settings.pay_by_paypal or settings.pay_by_p24) %}
+					<!--offer.html-->
+					<div class="row boxPromoted">
 						<div class="tab-pane container fade" id="promote" role="tabpanel" aria-labelledby="promote-tab">
+						</div>
 							<br>
 							{% if offer.active %}
 								{% if offer.promoted %}
@@ -302,7 +306,7 @@
 				</div>
 				{% if settings.social_facebook %}
 				<!--<div class="social"><a href="" type="button" role="button"class="btn-floating btn-lg share-btn "title="Powiedz przyjaciołom o nas."><i class="fas fa-share-alt"></i></a></div>-->
-					<div class="social_inline_block" style="padding-top:2px">
+					<div class="social_inline_block">
 						<div class="fb-like" data-href="{{ path('offer',offer.id,offer.slug) }}" data-layout="button" data-action="like" data-show-faces="true" data-share="true"></div>
 					</div>
 				{% endif %}
@@ -341,6 +345,7 @@
 	{% if offers %}
 		<div class="container">
 			<br>
+			<!--offer.html-->
 			<div class="similar">
 			<h2 class="text-center">{{ 'Similar offers'|lang }}</h2></div><br>
 			{% include 'offers_index.tpl' %}
