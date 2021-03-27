@@ -71,7 +71,7 @@
 		<h1>{% if settings.h1 %}{{ settings.h1 }}{% else %}{{ 'Offers'|lang }}{% endif %}</h1>
 	</div>
 	{% if settings.google_maps and offers_show_map %}
-		<div id="google_maps"></div>
+		<div id="google_maps" class="maps"></div>
 	{% endif %}
 	{% if settings.ads_1 %}<div class="ads">{{ settings.ads_1|raw }}</div>{% endif %}
 	<br>
@@ -82,7 +82,7 @@
 					<nav class="breadcrumbs" itemscope itemtype="http://schema.org/BreadcrumbList">
 						<a href="{{ settings.base_url }}" title="{{ 'Main Page'|lang }}" class="main-color-22" itemprop="itemListElement" >{{ 'Main Page'|lang }}</a>
 						{% for item in breadcrumbs %}
-							> <a href="{{ item.path }}" title="{{ item.name }}" class="main-color-23" itemprop="itemListElement" >{{ item.name }}</a>
+						<i class="fas fa-chevron-right" style="color:#23579b;"></i> <a href="{{ item.path }}" title="{{ item.name }}" class="main-color-23" itemprop="itemListElement" >{{ item.name }}</a>
 						{% endfor %}
 					</nav>
 				</div>
@@ -251,7 +251,6 @@
 		</div>
 	</div>
 </div>
-<div>1</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 {% endblock %}
