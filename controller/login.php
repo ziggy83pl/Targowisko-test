@@ -1,10 +1,6 @@
 <?php
 /************************************************************************
- * The script of website with announcements NOTICE2
- * Copyright (c) 2017 - 2018 Kamil Wyremski
- * http://wyremski.pl
- * kamil.wyremski@gmail.com
- *
+ * The script of website with announcements
  * All right reserved
  *
  * *********************************************************************
@@ -65,7 +61,29 @@ if(isset($_POST['action']) and $_POST['action'] == 'login' and !empty($_POST['se
 		$render_variables['form_complete_data'] = $complete_data;
 		$get_new_session_code = false;
 	}
+//rejestracja urzutkownika test dodania rcaptcha v2
+/*$secretkey = "6LfLT38fAAAAAGlsqXUAADC6V6w66txitRWdOeiE";
+$sitekey="6LfLT38fAAAAALjuOOnoDsXkzU0r1KmRsr-EV95j";
 
+if(isset($_POST['register'])){
+ $email = $_POST["email"];
+ $username = $_POST["username"];
+ $password = $_["password"];
+ $password = $_POST["password_repeat"];
+ $recaptchaResponse =$_POST["g-recaptcha-response"];
+ $userIp = $_SERVER["REMOTE_ADDR"];
+
+ $request = "https://www.google.com/recaptcha/api/siteverify?secret=$secretkey&response=$recaptchaResponse&remoteip=$userIp";
+
+ $content = file_get_contents($request);
+ $json = json_decode($content);
+ if ($json ->success == "true"){
+	 $msg = "Czesć rejestracja udała się !";
+ }else{
+	 $msg ="Niestety rejestracja nie udała sie ! Czy jestes robotem";
+ }
+ 
+}/*
 }elseif(isset($_POST['action']) and $_POST['action']=='register' and isset($_POST['email']) and isset($_POST['username']) and isset($_POST['password']) and isset($_POST['password_repeat']) and isset($_POST['captcha'])){
 
 	$result = $user->register($_POST);
