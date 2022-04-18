@@ -105,12 +105,14 @@
 								{% if error.captcha %}
 									<div class="alert alert-danger" role="alert"><i class="fas fa-exclamation"></i> {{ error.captcha }}</div>
 								{% endif %}
-								<div class="form-group">
+                             <!--dodanie rcaptcha do rejestracji-->
+                                                                <div class="g-recaptcha" data-sitekey="6LfLT38fAAAAALjuOOnoDsXkzU0r1KmRsr-EV95j"></div><br><br>
+								<!--<div class="form-group">
 									<label for="captcha">{{ 'Enter the code Captcha'|lang }}</label>
 									<br>
 									<img src="{{ path('captcha') }}" alt="captcha">
 									<input type="text" class="form-control" placeholder="abc123" title="{{ 'Enter the code Captcha'|lang }}" name="captcha" required maxlength="32">
-								</div>
+								</div>-->
 								<input type="submit" class="btn btn-1 text-uppercase" value="{{ 'Register'|lang }}">
 							</form>
 						</div>
