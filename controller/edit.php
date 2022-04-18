@@ -1,9 +1,6 @@
 <?php
 /************************************************************************
- * The script of website with announcements NOTICE2
- * Copyright (c) 2017 - 2018 Kamil Wyremski
- * http://wyremski.pl
- * kamil.wyremski@gmail.com
+ * The script of website with announcements 
  * 
  * All right reserved
  * 
