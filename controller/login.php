@@ -62,13 +62,10 @@ if(isset($_POST['action']) and $_POST['action'] == 'login' and !empty($_POST['se
 		$get_new_session_code = false;
 	}
 //rejestracja urzutkownika test dodania rcaptcha v2
-/*$secretkey = "6LfLT38fAAAAAGlsqXUAADC6V6w66txitRWdOeiE";
-$sitekey="6LfLT38fAAAAALjuOOnoDsXkzU0r1KmRsr-EV95j";
-
 if(isset($_POST['register'])){
  $email = $_POST["email"];
  $username = $_POST["username"];
- $password = $_["password"];
+ $password = $_POST["password"];
  $password = $_POST["password_repeat"];
  $recaptchaResponse =$_POST["g-recaptcha-response"];
  $userIp = $_SERVER["REMOTE_ADDR"];
